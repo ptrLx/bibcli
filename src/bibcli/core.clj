@@ -1,4 +1,4 @@
-(ns viewer.core
+(ns bibcli.core
   (:gen-class)
   ;; (:require [viewer.db :as db])
   )
