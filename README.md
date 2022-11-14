@@ -80,7 +80,7 @@ bibcli add --from-central --author "Einstein" --all
 
 Remove:
 
-```
+```bash
 bibcli rm <alias name>
 ```
 
@@ -90,13 +90,13 @@ Generate a .bib file for project:
 bibcli generate bib/out.bib
 ```
 
-List:
+List all resources:
 
 ```bash
 bibcli list
 ```
 
-Path:
+Get path:
 
 ```bash
 bibcli path <alias name>
@@ -117,6 +117,7 @@ bib
 ```
 
 `bib.json`:
+
 * connects bibtex metadata in `.bib` with your real files
 * can extend your bibliography with other types (videos, links)
 * contains personal tagging information
