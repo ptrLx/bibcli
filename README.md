@@ -4,11 +4,19 @@ A simple tool to manage your bibliography resources locally.
 
 ## Features
 
-* Central and derived repository and configurations
-* Ressource management
+* Central repository for managing all ressources
 * Metadata storage in Bib-Tex format
++ project specific reference management
 * Selective Bib-Tex export
 * Git integration
+
+## How?
+
+BibCLI will create a central repository of all recources in `~/.bibcli`.
+It will store all ressources and bibtex files with metadata.
+
+A specific project refers to ressources in your central repository with `bib-ref`.
+BibCLI can generate a project specific bibtex file form the `bib-ref`.
 
 ## Prerequisites
 
@@ -16,132 +24,126 @@ Git is set up correctly.
 
 ## Usage
 
-Get started:
+### Get started
 
 ```bash
 bibcli init --central --git
 ```
 
-> Repository will be created in `~/.bibcli`
+> Your repository will be created in `~/.bibcli`
 
 (Origin can be added manually with `git origin set <origin>`)
 
-Git automated commits:
+### Git automated commits
 
 ```bash
-bibcli config --central autocommit on
+bibcli config autocommit on
 ```
 
-Git automated push:
+### Git automated push
 
 ```bash
-bibcli config --central autopush on
+bibcli config autopush on
 ```
 
-Add resources:
+### Add resources
 
 ```bash
-bibcli add <path> --bibtex <path> --central --commit --push
+bibcli add <path>
 ```
 
 ```bash
-bibcli add <path> --alias <alias name> --type article --central --commit --push
+bibcli add <path> --bibtex <path> --commit --push
+```
+
+```bash
+bibcli add <path> --alias <alias name> --type article --commit --push
 ```
 
 > Alias or name is required for all ressources
 
 ```bash
-bibcli move <path> --bibtex <path> --central --commit --push
+bibcli move <path> --bibtex <path> --commit --push
 ```
 
-Add configuration to a project:
-
+### Add configuration to a project
 ```bash
-bibcli init --git
+bibcli init --ressources <alias 1> <alias 2> <alias 3>
 ```
 
-Search ressources:
-
-```bash
-bibcli search author "Einstein" --central
-
-> add as derivative to this repository? [N/y]
-```
-
-Add derived resources to a project:
-
-```bash
-bibcli add --copy --from-central <alias name>
-```
-
-```bash
-bibcli add --from-central --author "Einstein" --all
-```
-
-Remove:
-
-```bash
-bibcli rm <alias name>
-```
-
-Generate a .bib file for project:
-
-```bash
-bibcli generate bib/out.bib
-```
-
-List all resources:
+### List all ressources
 
 ```bash
 bibcli list
 ```
 
-Get path:
+### Find ressources
+
+```bash
+bibcli list author "Einstein"
+```
+
+### Add resources to a project
+
+```bash
+bibcli add <alias name>
+```
+
+```bash
+bibcli add --author "Einstein" --all
+```
+
+### Remove
+
+```bash
+bibcli rm <alias name>
+```
+
+### Generate a .bib file from a file
+
+```bash
+bibcli generate --out out.bib
+```
+
+### Get path
 
 ```bash
 bibcli path <alias name>
 ```
 
-## File structure
-
-bibcli requires a `bib` folder for repository configuration.
+## ~/.bibcli
 
 ```
-bib
-|-res
-|-alias-name
-  |-<resource>
-  |-.bib
-|-bib.json
-|-out.bib
+/.bibcli
+|-.git
+|-/res
+  |-/alias-name
+    |-/assets
+    |-<resource>
+    |-bib
+    |-meta.json
+|-config
 ```
 
-`bib.json`:
+### ~/.bibcli/config
 
-* connects bibtex metadata in `.bib` with your real files
-* can extend your bibliography with other types (videos, links)
-* contains personal tagging information
-* contains references to central repository
-* contains configuration (autocommit, autopush, ...)
+```conf
+autocommit = "false"
+autopush = "false"
+```
 
-example:
+### project/bib-ref
+
+```
+<alias 1>
+<alias 2>
+<alias 3>
+```
+
+### ~/.bibcli/alias-name/meta.json
+
+* contains only personal tagging information yet
 
 ```json
-{
-  "resources": {
-      "<alias-name>": {
-      "type": "reference",
-    },
-    "<alias-name>": {
-      "type": "bibtex",
-      "tags": ["disagree", "wrong"]
-    },
-    "<alias-name>": {
-      "type": "video",
-      "tags": ["skip to 3:30", "speed 2x"]
-    }
-  },
-  "autocommit": false,
-  "autopush": false
-}
+"tags": ["disagree", "wrong"]
 ```
