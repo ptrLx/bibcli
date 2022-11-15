@@ -1,10 +1,9 @@
 (ns bibcli.core
   (:gen-class)
-  ;; (:require [viewer.db :as db])
-  )
+  (:require [bibcli.args :as args]))
 
 (defn -main
   [& args]
-  (println "Hello World!")
-  ;; (db/print_receipts_entries)
-  )
+  (args/print_args args))
+
+(-main "test" "asdf" 1 2 3)

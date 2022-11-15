@@ -147,3 +147,22 @@ autopush = "false"
 ```json
 "tags": ["disagree", "wrong"]
 ```
+
+## Compile and run
+
+```bash
+lein run
+```
+
+## Dev environment
+
+### Prerequisites
+
+* Docker
+* VS Code
+
+### Get started
+
+* Install the remote-containers extension
+* Start the dev container
+* Start Calva Repl in VS Code
