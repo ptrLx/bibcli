@@ -1,6 +1,8 @@
 (ns bibcli.main
   (:require [cli-matic.core :as cli]
-            [bibcli.commands :as cmd]))
+            [bibcli.commands :as cmd]
+            [bibcli.system :as system]))
+
 
 (def CONFIGURATION
   {:app         {:command     "bibcli"
@@ -35,7 +37,8 @@
                   :opts        [{:option "path"
                                  :as "path of resource"
                                  :type :string
-                                 :default :present}
+                                 :default :present
+                                 :spec ::system/PATH-VALID}
                                 {:option "bibtex"
                                  :as "provied a bibtex fiel"
                                  :type :string}

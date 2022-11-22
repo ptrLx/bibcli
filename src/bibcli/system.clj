@@ -1,7 +1,11 @@
-(ns bibcli.system)
+(ns bibcli.system
+  (:require [expound.alpha :as expound]))
 
+(defn path_valid?
+  [path]
+  false)
 
-(defn parse_system
-  "Read through ~/.bibcli/config and apply config"
-  ;; todo
-  {:is_repo true, :autocommit true, :autopush true})
+(expound/def ::PATH-VALID
+  #(path_valid? %)
+  "invalid path")
+
