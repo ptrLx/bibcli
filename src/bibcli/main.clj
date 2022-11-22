@@ -31,7 +31,6 @@
                                  :default false}]
                   :runs cmd/init_central}
                  {:command "addc"
-                  ;; todo i need a path
                   :description "add a resource to the central repository"
                   :opts        [{:option "path"
                                  :as "path of resource"
@@ -45,7 +44,7 @@
                                  :type :keyword}
                                 {:option "type"
                                  :as "bibtex type"
-                                 :type #{"article", "misc"} ;;todo
+                                 :type #{"article" "misc"} ;;todo
                                  :default "misc"}
                                 {:option "commit"
                                  :as "commit to git"
@@ -70,7 +69,7 @@
                                  :type :keyword}
                                 {:option "type"
                                  :as "bibtex type"
-                                 :type #{"article", "misc"} ;;todo
+                                 :type #{"article" "misc"} ;;todo
                                  :default "misc"}
                                 {:option "commit"
                                  :as "commit to git"
