@@ -1,0 +1,12 @@
+{
+    "cSpell.words": [
+        "autocommit",
+        "autopush",
+        "bibcli",
+        "bibtex",
+        "Calva"
+    ],
+    "cSpell.enableFiletypes": [
+        "clj"
+    ],
+}

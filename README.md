@@ -4,7 +4,7 @@ A simple tool to manage your bibliography resources locally.
 
 ## Features
 
-* Central repository for managing all ressources
+* Central repository for managing all resources
 * Metadata storage in Bib-Tex format
 + project specific reference management
 * Selective Bib-Tex export
@@ -12,22 +12,32 @@ A simple tool to manage your bibliography resources locally.
 
 ## How?
 
-BibCLI will create a central repository of all recources in `~/.bibcli`.
-It will store all ressources and bibtex files with metadata.
+BibCLI will create a central repository of all resources in `~/.bibcli`.
+It will store all resources and bibtex files with metadata.
 
-A specific project refers to ressources in your central repository with `bib-ref`.
+A specific project refers to resources in your central repository with `bib-ref`.
 BibCLI can generate a project specific bibtex file form the `bib-ref`.
 
 ## Prerequisites
 
 Git is set up correctly.
 
+## Installation
+
+### Babashka
+
+* Install babashka: `bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)`
+* Execute with
+  ```bash
+  bb -m bibcli.main <args>
+  ```
+
 ## Usage
 
 ### Get started
 
 ```bash
-bibcli init --central --git
+bibcli initc --git
 ```
 
 > Your repository will be created in `~/.bibcli`
@@ -37,47 +47,56 @@ bibcli init --central --git
 ### Git automated commits
 
 ```bash
-bibcli config autocommit on
+bibcli config --autocommit
+```
+
+```bash
+bibcli config --no-autocommit
 ```
 
 ### Git automated push
 
 ```bash
-bibcli config autopush on
+bibcli config --autopush
+```
+
+```bash
+bibcli config --no-autopush
 ```
 
 ### Add resources
 
 ```bash
-bibcli add <path>
+bibcli addc <path>
 ```
 
 ```bash
-bibcli add <path> --bibtex <path> --commit --push
+bibcli addc <path> --bibtex <path> --commit --push
 ```
 
 ```bash
-bibcli add <path> --alias <alias name> --type article --commit --push
+bibcli addc <path> --alias <alias name> --type article --commit --push
 ```
 
-> Alias or name is required for all ressources
+> Alias or name is required for all resources
 
 ```bash
-bibcli move <path> --bibtex <path> --commit --push
+bibcli movec <path> --bibtex <path> --commit --push
 ```
 
 ### Add configuration to a project
+
 ```bash
-bibcli init --ressources <alias 1> <alias 2> <alias 3>
+bibcli init --resources <alias 1> <alias 2> <alias 3>
 ```
 
-### List all ressources
+### List all resources
 
 ```bash
 bibcli list
 ```
 
-### Find ressources
+### Find resources
 
 ```bash
 bibcli list author "Einstein"
@@ -86,17 +105,17 @@ bibcli list author "Einstein"
 ### Add resources to a project
 
 ```bash
-bibcli add <alias name>
+bibcli add <alias list>
 ```
 
 ```bash
-bibcli add --author "Einstein" --all
+bibcli add --author "Einstein"
 ```
 
 ### Remove
 
 ```bash
-bibcli rm <alias name>
+bibcli rm <alias list>
 ```
 
 ### Generate a .bib file from a file
@@ -140,18 +159,13 @@ autopush = "false"
 <alias 3>
 ```
 
-### ~/.bibcli/alias-name/meta.json
+### ~/.bibcli/alias-name/tags
 
-* contains only personal tagging information yet
+contains personal tagging information
 
-```json
-"tags": ["disagree", "wrong"]
 ```
-
-## Compile and run
-
-```bash
-lein run
+disagree
+wrong
 ```
 
 ## Dev environment
@@ -166,3 +180,4 @@ lein run
 * Install the remote-containers extension
 * Start the dev container
 * Start Calva Repl in VS Code
+
