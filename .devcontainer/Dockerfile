@@ -34,6 +34,8 @@ ARG INSTALL_LEININGEN="true"
 # [Option] Install Polylith
 ARG INSTALL_POLYLITH="true"
 
+ARG BB_VERSION=1.0.166
+
 RUN if [ "${INSTALL_CLOJURE_CLI}" = "true" ]; then \
     apt-get update \
     && apt-get -y install rlwrap \
@@ -83,4 +85,8 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 # Clean up package lists
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-RUN bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)
+RUN apt-get install curl bash
+
+RUN curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
+    && chmod +x install \
+    && ./install --version $BB_VERSION --static
