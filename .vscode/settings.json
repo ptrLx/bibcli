@@ -1,12 +1,31 @@
 {
     "cSpell.words": [
+        "addc",
+        "annote",
         "autocommit",
+        "autocommits",
         "autopush",
         "bibcli",
         "bibtex",
-        "Calva"
+        "booktitle",
+        "Calva",
+        "crossref",
+        "defn",
+        "howpublished",
+        "inbook",
+        "incollection",
+        "initc",
+        "inproceedings",
+        "listc",
+        "mastersthesis",
+        "movec",
+        "phdthesis",
+        "println",
+        "techreport"
     ],
     "cSpell.enableFiletypes": [
-        "clj"
+        "bibtex",
+        "clj",
+        "clojure"
     ],
 }

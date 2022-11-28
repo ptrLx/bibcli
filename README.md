@@ -6,7 +6,7 @@ A simple tool to manage your bibliography resources locally.
 
 * Central repository for managing all resources
 * Metadata storage in Bib-Tex format
-+ project specific reference management
+* project specific reference management
 * Selective Bib-Tex export
 * Git integration
 
@@ -28,6 +28,7 @@ Git is set up correctly.
 
 * Install babashka: `bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)`
 * Execute with
+
   ```bash
   bb -m bibcli.main <args>
   ```
@@ -170,14 +171,13 @@ wrong
 
 ## Dev environment
 
-### Prerequisites
+Required:
 
 * Docker
 * VS Code
 
-### Get started
+Get started:
 
 * Install the remote-containers extension
 * Start the dev container
 * Start Calva Repl in VS Code
-
