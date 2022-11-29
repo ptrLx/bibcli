@@ -91,7 +91,8 @@
   true)
 
 (expound/def ::BIB-REF-EXISTS
-  #(bib-ref_exists?)
+  (fn [_outfile]
+    (bib-ref_exists?))
   "no bib-ref file found in current folder")
 
 ;; todo (spec/def ::CAN-INIT (spec/and (spec/not ::BIB-REF-EXISTS) (LIST-ALIAS-EXISTS)))

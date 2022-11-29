@@ -37,7 +37,7 @@
   "Verify a string for being in bibtex formate"
   [bibtex]
   ;; todo
-  )
+  true)
 
 (expound/def ::BIBTEX-VALID
   #(bibtex_valid? %)

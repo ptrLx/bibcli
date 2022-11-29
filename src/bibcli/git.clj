@@ -16,12 +16,12 @@
 (defn central_is_repo?
   []
   (println "not implemented!")
-  true)
+  false)
 
 (expound/def ::CENTRAL-IS-REPO
   #(central_is_repo?)
   "central repository has been already initialized with git")
 
 (expound/def ::CENTRAL-IS-NOT-REPO
-  #(not (central_is_repo?))
+  #(if % (not (central_is_repo?)))
   "central repository is not yet initialized with git")

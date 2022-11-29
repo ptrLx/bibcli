@@ -7,7 +7,6 @@
 
 (def ^:private opts_add_move
   [{:option "path"
-    :short "p"
     :as "path of resource"
     :type :string
     :default :present
@@ -49,7 +48,7 @@
 
    :commands    [{:command     "config"
                   :description "configure bibcli"
-                  :examples    ["bibcli configure --autocommit" "bibcli configure --no-autopush"]
+                  :examples    ["bibcli config --autocommit" "bibcli config --no-autopush"]
                   :opts        [{:option "autocommit"
                                  :as "automated commits to git"
                                  :type :with-flag
@@ -106,10 +105,10 @@
                   :runs cmd/list_central}
                  {:command     "init"
                   :description "initialize a path as project. This will create a bib-ref file"
-                  :examples    ["bibcli init -a <alias 1> <alias 2>"]
-                  :opts        [{:option "aliases"
+                  :examples    ["bibcli init -a <alias 1> -a <alias 2>"]
+                  :opts        [{:option "alias"
                                  :short "a"
-                                 :as "list of resource-aliases you want to have in this project"
+                                 :as "alias of resource you want to have in this project"
                                  :type :keyword
                                  :multiple true
                                 ;;  todo :spec ::system/CAN-INIT
@@ -119,29 +118,28 @@
                   :description "add resource to current project"
                   :examples ["bibcli add -a <alias 1> -a <alias 2>"
                              "bibcli add --author einstein"]
-                  :opts [{:option "aliases"
+                  :opts [{:option "alias"
                           :short "a"
-                          :as "add resources with those aliases"
+                          :as "add resource with this alias"
                           :type :keyword
                           :multiple true
                           :spec ::system/LIST-ALIAS-EXISTS}
                          {:option "author"
-                          :as "add all resources from those authors"
+                          :as "add all resources from this authors"
                           :type :string
                           :multiple true}]
                   :runs cmd/add_local}
                  {:command "rm"
                   :description "delete resources from project"
                   :examples ["bibcli rm -a <alias 1> -a <alias 2>"]
-                  :opts [{:option "aliases"
+                  :opts [{:option "alias"
                           :short "a"
-                          :as "delete resources with this aliases"
+                          :as "delete resources with this alias from current project"
                           :type :keyword
                           :multiple true
                           :spec ::system/LIST-ALIAS-EXISTS}]
                   :runs cmd/remove_local}
                  {:command "path"
-                  :short "p"
                   :description "get path of a resource"
                   :examples ["bibcli path -a <alias>"]
                   :opts [{:option "alias"

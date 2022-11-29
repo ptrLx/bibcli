@@ -17,38 +17,39 @@
 
 (defn _add_central
   [path bibtex alias type commit push move]
-  (if (not (nil? bibtex))
-    (if (system/path_valid? bibtex)
-      ((if (not (nil? alias))
-         (;; todo use this alias
-          ))
-       ((if (not (contains? bibtex/types type))
-          (;; todo use type :misc
-           )))
-       (;; todo read path file and bibtex file and store in repo
-        ))
-      (;; todo error invalid bibtex file provided
-       ))
-    (if (not (nil? alias))
-      (if (not (nil type))
-        (;; todo prompt editor with alias and type bibtex template
-         )
-        (;; todo use type :misc
-         ))
-      (;; todo error: No bibtex file and no alias is provided.
-       )))
+  ;; (if (not (nil? bibtex))
+  ;;   (if (system/path_valid? bibtex)
+  ;;     ((if (not (nil? alias))
+  ;;        (;; todo use this alias
+  ;;         ))
+  ;;      ((if (not (contains? bibtex/types type))
+  ;;         (;; todo use type :misc
+  ;;          )))
+  ;;      (;; todo read path file and bibtex file and store in repo
+  ;;       ))
+  ;;     (;; todo error invalid bibtex file provided
+  ;;      ))
+  ;;   (if (not (nil? alias))
+  ;;     (if (not (nil type))
+  ;;       (;; todo prompt editor with alias and type bibtex template
+  ;;        )
+  ;;       (;; todo use type :misc
+  ;;        ))
+  ;;     (;; todo error: No bibtex file and no alias is provided.
+  ;;      )))
 
-  (if move (;; todo move path to repo
-              ;; todo println
-            )
-      (;; todo copy path to repo
-    ;; todo println
-       ))
+  ;; (if move (;; todo move path to repo
+  ;;             ;; todo println
+  ;;           )
+  ;;     (;; todo copy path to repo
+  ;;   ;; todo println
+  ;;      ))
 
-  (if (or commit (system/autocommit_is_set))
-    ((git/commit_add_res "TODO_INSERT_ALIAS")
-     (if (or push (system/autopush_is_set))
-       (git/push_central)))))
+  ;; (if (or commit (system/autocommit_is_set))
+  ;;   ((git/commit_add_res "TODO_INSERT_ALIAS")
+  ;;    (if (or push (system/autopush_is_set))
+  ;;      (git/push_central))))
+  )
 
 (defn add_central
   [{:keys [path bibtex alias type commit push] :as _args}]
