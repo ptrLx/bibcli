@@ -110,7 +110,7 @@
   ;; todo
   )
 
-(defn remove_local
+(defn remove_aliases_bib-ref
   "Remove aliases from bib-ref file if it exists"
   [aliases]
   ;; todo
