@@ -131,3 +131,23 @@
   [alias]
   ;; todo
   )
+
+;; DUMMY-FUNCTIONS TO GRANT FUNCTIONALLITY
+(defn set_autocommit []
+  (do))
+
+(defn set_autopush []
+  (do))
+
+(defn list_all_res []
+  (do))
+
+(defn remove_local []
+  (do))
+
+(defn get_path []
+  (do))
+
+
+
+

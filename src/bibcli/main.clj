@@ -66,7 +66,7 @@
                                  :as "also initialize as git repository"
                                  :type :with-flag
                                  :default false
-                                 :spec ::git/CENTRAL-IS-NOT-REPO}]
+                                 }]
                   :runs cmd/init_central}
                  {:command "addc"
                   :description "add a resource to the central repository"
