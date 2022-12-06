@@ -1,88 +1,67 @@
 (ns bibcli.system
-  (:require [expound.alpha :as expound]))
+  (:require [expound.alpha :as expound]
+            [babashka.fs :as fs]
+            [clojure.data.json :as json]))
 
-;;* 
-;;* central system
-;;* 
+;;;; General project
 
-(defn path_valid?
-  [path]
-  true)
+(defn init_central []
+  ;; Add initial folder structure
+  (fs/create-dirs (str (fs/home) "/.bibcli/res")))
 
-(expound/def ::PATH-VALID
-  #(path_valid? %)
-  "invalid path")
+(defn init_config []
+  ;; Create an empty(!) config file
+  (fs/create-file (str (fs/home) "/.bibcli.conf")))
 
-(defn init_central
-  "Create basic structure of ~/.bibcli"
-  []
-  (println "not implemented!"))
+(defn delete_central []
+  ;; Delete initial folder structure
+  (fs/delete-tree (str (fs/home) "/.bibcli")))
 
-(defn set_autocommit
-  "Enable autocommits in configuration"
-  [v]
-  (println "not implemented!"))
+(defn list_aliases []
+  ;; Return a list with names of all available aliases
+  ;; Check project directory exists
+  (if (fs/exists? (str (fs/home) "/.bibcli/res"))
+    (let [FILTER_FOLDER (map str (filter fs/directory? (fs/list-dir (str (fs/home) "/.bibcli/res"))))]
+      (map #(clojure.string/replace %1 (str (fs/home) "/.bibcli/res/") "") FILTER_FOLDER))
+    nil))
 
-(defn set_autopush
-  "Enable autopush in configuration"
-  [v]
-  (println "not implemented!"))
+;;;; Handle config content
 
-(defn autocommit_is_set
-  []
-  ;; todo
-  false)
+(defn read_config []
+  ;; Return a dictionary from json config
+  (json/read (clojure.java.io/reader (str (fs/home) "/.bibcli.conf"))))
 
-(defn autopush_is_set
-  []
-  ;; todo
-  false)
+;; Return all keys from config
+(defn keys_of_config [] (keys (read_config)))
 
-(defn alias_exists?
-  [alias]
-  ;; todo
-  false)
+;; Get value from key
+(defn val_from_key_config [key] ((read_config) key))
 
-(expound/def ::ALIAS-EXISTS
-  #(alias_exists? %)
-  "alias does not exist in repository")
+;; Write with arg as map to config
+(defn write-config [arg]
+  (if (map? arg)
+    (fs/write-lines (fs/file (str (fs/home) "/.bibcli.conf")) [(json/write-str arg :indent true)])
+    nil))
 
-(expound/def ::ALIAS-NOT-EXISTS
-  #(not (alias_exists? %))
-  "alias does already exist in repository")
+;; Add key-value pair to config json
+(defn add_data_config [key value]
+  (write-config (assoc (read_config) key value)))
 
-(expound/def ::LIST-ALIAS-EXISTS
-  (fn [aliases]
-    (;; todo loop through aliases and call alias_exists?. if one does not, return false
-     = 1 1))
-  "alias not found")
+;; Delete by key of config json
+(defn del_data_config [key]
+  (let [readMap (read_config)]
+    (if (readMap key) (write-config (dissoc readMap key)) nil)))
 
-(defn remove_central
-  [alias]
-;; todo delete folder with alias
-  )
+;;;; Utils
 
-(defn list_all_res
-  []
-;; todo
-  )
+;; Returns true if f exists.
+(defn path_valid? [path] (fs/exists? path))
 
-(defn list_all_res_from_author
-  "Scan all resources and return a set of aliases for given author.
-   only include resources of this type, if type is not nil"
-  [author type]
-  ;; todo
-  )
+(defn alias_exists? [alias]
+  ;; Return true or false
+  (path_valid? (str (fs/home) "/.bibcli/res/" alias)))
 
-(defn get_path
-  "Return path of the resource of a given alias"
-  [alias]
-  ;; todo
-  )
-
-;;* 
-;;* Local system
-;;* 
+;;;; Bibtex related
 
 (defn bib-ref_exists?
   "Checks if a bib-ref file exists in current folder"
@@ -113,5 +92,42 @@
 (defn remove_aliases_bib-ref
   "Remove aliases from bib-ref file if it exists"
   [aliases]
+  ;; todo
+  )
+
+;;;; MACRO-FUNCTIONS
+
+(expound/def ::PATH-VALID
+  #(path_valid? %)
+  "invalid path")
+
+(expound/def ::ALIAS-EXISTS
+  #(alias_exists? %)
+  "alias does not exist in repository")
+
+(expound/def ::ALIAS-NOT-EXISTS
+  #(not (alias_exists? %))
+  "alias does already exist in repository")
+
+(expound/def ::LIST-ALIAS-EXISTS
+  (fn [aliases]
+    (;; todo loop through aliases and call alias_exists?. if one does not, return false
+     = 1 1))
+  "alias not found")
+
+;;;; NOT IMPLEMENTED
+
+;; COMMENT_MB: Das fällt unter Kategorie Bibtex?
+(defn list_all_res_from_author
+  "Scan all resources and return a set of aliases for given author.
+   only include resources of this type, if type is not nil"
+  [author type]
+  ;; todo
+  )
+
+;; COMMENT-MB: Ist das notwendig?
+(defn get_path
+  "Return path of the resource of a given alias"
+  [alias]
   ;; todo
   )
