@@ -1,13 +1,15 @@
 (ns bibcli.system
-  (:require [expound.alpha :as expound]
+  (:require [expound.alpha :as e]
             [babashka.fs :as fs]
             [clojure.data.json :as json]))
 
 ;;;; General project
 
-(def root_folder
+(defn root_folder
+  []
   (str (fs/home) "/.bibcli"))
-(def config_json
+(defn config_json
+  []
   (str (fs/home) "/.bibcli.json"))
 
 (defn init_central
@@ -18,12 +20,12 @@
 (defn init_config
   "Create an empty(!) config file"
   []
-  (fs/create-file config_json))
+  (fs/create-file (config_json)))
 
 (defn delete_central
   "Delete initial folder structure"
   []
-  (fs/delete-tree root_folder))
+  (fs/delete-tree (root_folder)))
 
 (defn list_aliases
   "Return a list with names of all available aliases
@@ -39,7 +41,7 @@
 (defn read_config
   "Return a dictionary from json config"
   []
-  (json/read (clojure.java.io/reader config_json)))
+  (json/read (clojure.java.io/reader (config_json))))
 
 (defn keys_of_config
   "Return all keys from config"
@@ -55,7 +57,7 @@
   "Write with arg as map to config"
   [arg]
   (if (map? arg)
-    (fs/write-lines (fs/file config_json) [(json/write-str arg :indent true)])
+    (fs/write-lines (fs/file (config_json)) [(json/write-str arg :indent true)])
     nil))
 
 (defn add_data_config
@@ -96,8 +98,8 @@
     (not (bib-ref_exists?)))
   "Bib-ref file already exists in current folder. Use `bibcli add` instead")
 
-(s/def ::CAN-INIT
-  (s/and (vector? ::BIB-NOT-REF-EXISTS)))
+;; (s/def ::CAN-INIT
+;;   (s/and (vector? ::BIB-NOT-REF-EXISTS)))
 
 ;; (e/def ::CAN-INIT
 ;;   (fn [a]
@@ -126,19 +128,19 @@
 
 ;;;; MACRO-FUNCTIONS
 
-(expound/def ::PATH-VALID
+(e/def ::PATH-VALID
   #(path_valid? %)
   "invalid path")
 
-(expound/def ::ALIAS-EXISTS
+(e/def ::ALIAS-EXISTS
   #(alias_exists? %)
   "alias does not exist in repository")
 
-(expound/def ::ALIAS-NOT-EXISTS
+(e/def ::ALIAS-NOT-EXISTS
   #(not (alias_exists? %))
   "alias does already exist in repository")
 
-(expound/def ::LIST-ALIAS-EXISTS
+(e/def ::LIST-ALIAS-EXISTS
   (fn [aliases]
     (;; todo loop through aliases and call alias_exists?. if one does not, return false
      = 1 1))

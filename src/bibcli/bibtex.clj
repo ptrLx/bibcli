@@ -88,9 +88,9 @@
   ;; todo
   )
 
-(print_format
- [bibtex]
- "todo")
+(defn print_format
+  [bibtex]
+  "todo")
 
 ;; (defn requirements_satisfied?
 ;;   [bibtex]

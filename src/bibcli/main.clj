@@ -10,13 +10,13 @@
     :as "path of resource"
     :type :string
     :default :present
-    :spec ::system/PATH-VALID}
+    :spec ::system/FILE-EXISTS}
    {:option "bibtex"
     :short "b"
     :as "provide a bibtex fiel"
     :type :string
     :default nil
-    :spec ::bibtex/BIBTEX-VALID}
+    :spec ::system/FILE-EXISTS}
    {:option "alias"
     :short "a"
     :as "alias name"
@@ -26,7 +26,7 @@
    {:option "type"
     :short "t"
     :as "bibtex type"
-    :type bibtex/types
+    :type (keys bibtex/bibtex_types)
     :default nil}
    {:option "commit"
     :short "c"
@@ -65,8 +65,7 @@
                                  :short "g"
                                  :as "also initialize as git repository"
                                  :type :with-flag
-                                 :default false
-                                 }]
+                                 :default false}]
                   :runs cmd/init_central}
                  {:command "addc"
                   :description "add a resource to the central repository"
@@ -100,7 +99,7 @@
                                 {:option "type"
                                  :short "t"
                                  :as "list only resources of this bibtex type"
-                                 :type bibtex/types
+                                 :type (keys bibtex/bibtex_types)
                                  :default nil}]
                   :runs cmd/list_central}
                  {:command     "init"
@@ -111,7 +110,7 @@
                                  :as "alias of resource you want to have in this project"
                                  :type :keyword
                                  :multiple true
-                                ;;  todo :spec ::system/CAN-INIT
+                                ;; todo :spec ::system/CAN-INIT
                                  }]
                   :runs cmd/init_local}
                  {:command "add"
