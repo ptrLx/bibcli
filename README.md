@@ -141,15 +141,17 @@ bibcli path <alias name>
     |-/assets
     |-<resource>
     |-bib
-    |-meta.json
-|-config
+    |-tags
+.bibcli.json
 ```
 
 ### ~/.bibcli/config
 
-```conf
-autocommit = "false"
-autopush = "false"
+```json
+{
+  "autocommit": false,
+  "autopush": false
+}
 ```
 
 ### project/bib-ref

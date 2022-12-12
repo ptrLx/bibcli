@@ -17,10 +17,11 @@
       "settings": {},
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-        "vscjava.vscode-java-pack",
-        "borkdude.clj-kondo",
-        "betterthantomorrow.calva"
-      ]
+		"vscjava.vscode-java-pack",
+		"borkdude.clj-kondo",
+		"betterthantomorrow.calva",
+		"eamodio.gitlens"
+	]
     }
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
