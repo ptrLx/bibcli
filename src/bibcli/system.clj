@@ -12,15 +12,16 @@
   []
   (str (fs/home) "/.bibcli.json"))
 
-(defn init_central
-  "Add initial folder structure"
-  []
-  (fs/create-dirs (str (root_folder) "/res")))
-
 (defn init_config
   "Create an empty(!) config file"
   []
-  (fs/create-file (config_json)))
+  (fs/write-lines (fs/file (config_json)) ["{}"]))
+
+(defn init_central
+  "Add initial folder structure"
+  []
+  (fs/create-dirs (str (root_folder) "/res"))
+  (init_config))
 
 (defn delete_central
   "Delete initial folder structure"
@@ -53,7 +54,7 @@
   [key]
   ((read_config) key))
 
-(defn write-config
+(defn ^:private write-config
   "Write with arg as map to config"
   [arg]
   (if (map? arg)
@@ -63,13 +64,13 @@
 (defn add_data_config
   "Add key-value pair to config json"
   [key value]
-  (write-config (assoc (read_config) key value)))
+  (write-config (assoc (read_config) (if (keyword? key) (name key) key) value)))
 
 (defn del_data_config
   "Delete by key of config json"
   [key]
   (let [readMap (read_config)]
-    (if (readMap key) (write-config (dissoc readMap key)) nil)))
+    (if (readMap key) (write-config (dissoc readMap (if (keyword? key) (name key) key))) nil)))
 
 ;;;; Utils
 
@@ -167,11 +168,6 @@
 
 ;; DUMMY-FUNCTIONS TO GRANT FUNCTIONALLITY
 
-(defn set_autocommit []
-  (do))
-
-(defn set_autopush []
-  (do))
 
 (defn list_all_res []
   (do))

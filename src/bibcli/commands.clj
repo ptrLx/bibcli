@@ -5,11 +5,10 @@
 
 (defn config
   [{:keys [autocommit autopush] :as _args}]
-  ;; (if (boolean? autocommit)
-  ;;   (system/set_autocommit autocommit))
-  ;; (if (boolean? autopush)
-  ;;   (system/set_autopush autopush))
-  )
+  (if (boolean? autocommit)
+    (system/add_data_config :autocommit autocommit))
+  (if (boolean? autopush)
+    (system/add_data_config :autopush autopush)))
 
 (defn init_central
   [{:keys [git] :as _args}]
