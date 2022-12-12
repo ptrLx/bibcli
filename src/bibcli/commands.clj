@@ -54,8 +54,7 @@
 
 (defn remove_central
   [{:keys [alias] :as _args}]
-  ;; todo loop through aliases and call system/remove_central for every alias
-  (println _args))
+  (doseq [i alias] (system/remove_central i)))
 
 (defn list_central
   [{:keys [author type] :as _args}]

@@ -3,14 +3,26 @@
             [babashka.fs :as fs]
             [clojure.data.json :as json]))
 
-;;;; General project
-
 (defn root_folder
   []
   (str (fs/home) "/.bibcli"))
 (defn config_json
   []
   (str (fs/home) "/.bibcli.json"))
+
+;;;; Utils
+
+;; Returns true if f exists.
+(defn path_valid? [path] (fs/exists? path))
+
+(defn res_exists? [alias]
+  ;; Return true or false
+  (path_valid? (str (root_folder) "/res/" alias)))
+
+(defn multiple_res_exist? [aliases]
+  (eval `(and ~@(map res_exists? aliases))))
+
+;;;; General project
 
 (defn init_config
   "Create an empty(!) config file"
@@ -23,10 +35,18 @@
   (fs/create-dirs (str (root_folder) "/res"))
   (init_config))
 
-(defn delete_central
+(defn ^:private delete_central
   "Delete initial folder structure"
   []
   (fs/delete-tree (root_folder)))
+
+(defn remove_central
+  "Remove folder of alias"
+  [alias]
+  (if
+   (res_exists? alias)
+    (fs/delete-tree (str (root_folder) "/res/" alias)))
+  nil)
 
 (defn list_aliases
   "Return a list with names of all available aliases
@@ -39,12 +59,12 @@
 
 ;;;; Handle config content
 
-(defn read_config
+(defn ^:private read_config
   "Return a dictionary from json config"
   []
   (json/read (clojure.java.io/reader (config_json))))
 
-(defn keys_of_config
+(defn ^:private keys_of_config
   "Return all keys from config"
   []
   (keys (read_config)))
@@ -71,15 +91,6 @@
   [key]
   (let [readMap (read_config)]
     (if (readMap key) (write-config (dissoc readMap (if (keyword? key) (name key) key))) nil)))
-
-;;;; Utils
-
-;; Returns true if f exists.
-(defn path_valid? [path] (fs/exists? path))
-
-(defn alias_exists? [alias]
-  ;; Return true or false
-  (path_valid? (str (root_folder) "/res/" alias)))
 
 ;;;; Bibtex related
 
@@ -134,11 +145,15 @@
   "invalid path")
 
 (e/def ::ALIAS-EXISTS
-  #(alias_exists? %)
+  #(res_exists? %)
+  "alias does not exist in repository")
+
+(e/def ::ALIASES-EXISTS ;;todo macro magic with ::ALIAS-EXISTS
+  #(multiple_res_exist? %)
   "alias does not exist in repository")
 
 (e/def ::ALIAS-NOT-EXISTS
-  #(not (alias_exists? %))
+  #(not (res_exists? %))
   "alias does already exist in repository")
 
 (e/def ::LIST-ALIAS-EXISTS

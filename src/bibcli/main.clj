@@ -20,7 +20,7 @@
    {:option "alias"
     :short "a"
     :as "alias name"
-    :type :keyword
+    :type :string
     :default nil
     :spec ::system/ALIAS-NOT-EXISTS}
    {:option "type"
@@ -86,8 +86,9 @@
                           :short "a"
                           :as "remove resource with this alias"
                           :type :string
+                          :multiple true
                           :default :present
-                          :spec ::system/ALIAS-EXISTS}]
+                          :spec ::system/ALIASES-EXISTS}]
                   :runs cmd/remove_central}
                  {:command "listc"
                   :description "list resources"
@@ -108,7 +109,7 @@
                   :opts        [{:option "alias"
                                  :short "a"
                                  :as "alias of resource you want to have in this project"
-                                 :type :keyword
+                                 :type :string
                                  :multiple true
                                 ;; todo :spec ::system/CAN-INIT
                                  }]
@@ -120,7 +121,7 @@
                   :opts [{:option "alias"
                           :short "a"
                           :as "add resource with this alias"
-                          :type :keyword
+                          :type :string
                           :multiple true
                           :spec ::system/LIST-ALIAS-EXISTS}
                          {:option "author"
@@ -134,7 +135,7 @@
                   :opts [{:option "alias"
                           :short "a"
                           :as "delete resources with this alias from current project"
-                          :type :keyword
+                          :type :string
                           :multiple true
                           :spec ::system/LIST-ALIAS-EXISTS}]
                   :runs cmd/remove_local}
@@ -144,7 +145,7 @@
                   :opts [{:option "alias"
                           :short "a"
                           :as "alias of resource"
-                          :type :keyword
+                          :type :string
                           :spec ::system/ALIAS-EXISTS}]
                   :runs cmd/path}
                  {:command "generate"
