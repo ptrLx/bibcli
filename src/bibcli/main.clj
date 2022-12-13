@@ -26,7 +26,7 @@
    {:option "type"
     :short "t"
     :as "bibtex type"
-    :type (keys bibtex/bibtex_types)
+    :type (set (keys bibtex/bibtex_types))
     :default nil}
    {:option "commit"
     :short "c"
@@ -100,7 +100,7 @@
                                 {:option "type"
                                  :short "t"
                                  :as "list only resources of this bibtex type"
-                                 :type (keys bibtex/bibtex_types)
+                                 :type (set (keys bibtex/bibtex_types))
                                  :default nil}]
                   :runs cmd/list_central}
                  {:command     "init"
