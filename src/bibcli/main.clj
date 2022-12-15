@@ -10,13 +10,13 @@
     :as "path of resource"
     :type :string
     :default :present
-    :spec ::system/FILE-EXISTS}
+    :spec ::system/PATH-VALID}
    {:option "bibtex"
     :short "b"
     :as "provide a bibtex fiel"
     :type :string
     :default nil
-    :spec ::system/FILE-EXISTS}
+    :spec ::system/PATH-VALID}
    {:option "alias"
     :short "a"
     :as "alias name"

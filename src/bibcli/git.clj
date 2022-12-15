@@ -11,11 +11,11 @@
 
 (defn commit_add_res
   [alias]
-  (println "not implemented!"))
+  (println "commit_add_res: not implemented!"))
 
 (defn push_central
   []
-  (println "not implemented!"))
+  (println "push_central: not implemented!"))
 
 (defn central_is_repo?
   []
@@ -27,5 +27,7 @@
   "Central repository has been already initialized with git")
 
 (expound/def ::CENTRAL-IS-NOT-REPO
-  #(if % (not (central_is_repo?)))
+  #(if %
+     (not (central_is_repo?))
+     ())
   "Central repository has not been initialized with git")

@@ -48,6 +48,25 @@
     (fs/delete-tree (str (root_folder) "/res/" alias)))
   nil)
 
+(defn create_central
+  "Create a folder in central repository"
+  [alias]
+  (fs/create-dirs (str (root_folder) "/res/" alias)))
+
+(defn move_to_central
+  "Move a file to central repository"
+  [alias path]
+  (fs/move path (str (root_folder) "/res/" alias)))
+
+(defn copy_to_central
+  "Copy a file to central repository"
+  [alias path]
+  (println "copy_to_central not implemented!"))
+
+(defn create_file_central
+  [alias filename content]
+  (println "create_file_in_central not implemented!"))
+
 (defn list_aliases
   "Return a list with names of all available aliases
    Check project directory exists"
@@ -192,7 +211,3 @@
 
 (defn get_path []
   (do))
-
-
-
-
