@@ -61,11 +61,11 @@
 (defn copy_to_central
   "Copy a file to central repository"
   [alias path]
-  (println "copy_to_central not implemented!"))
+  (fs/copy path (str (root_folder) "/res/" alias)))
 
 (defn create_file_central
   [alias filename content]
-  (println "create_file_in_central not implemented!"))
+  (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) [content]))
 
 (defn list_aliases
   "Return a list with names of all available aliases

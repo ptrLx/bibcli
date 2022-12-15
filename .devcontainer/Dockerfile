@@ -34,7 +34,7 @@ ARG INSTALL_LEININGEN="true"
 # [Option] Install Polylith
 ARG INSTALL_POLYLITH="true"
 
-ARG BB_VERSION=1.0.166
+ARG BB_VERSION=1.0.168
 
 RUN if [ "${INSTALL_CLOJURE_CLI}" = "true" ]; then \
     apt-get update \
@@ -90,3 +90,5 @@ RUN apt-get install curl bash
 RUN curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
     && chmod +x install \
     && ./install --version $BB_VERSION --static
+
+RUN echo 'alias bibcli="bb -m bibcli.main"' >> ~/.zshrc

@@ -92,9 +92,7 @@
   "todo"
   [type]
   (print "print_format not implemented!")
-  (print " type was ")
-  (println type)
-  "print format")
+  (str "type is " type))
 
 ;; (defn requirements_satisfied?
 ;;   [bibtex]
