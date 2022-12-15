@@ -51,12 +51,12 @@
 (defn create_central
   "Create a folder in central repository"
   [alias]
-  (fs/create-dirs (str (root_folder) "/res/" alias)))
+  (fs/create-dirs (str (root_folder) "/res/" alias "/")))
 
 (defn move_to_central
   "Move a file to central repository"
   [alias path]
-  (fs/move path (str (root_folder) "/res/" alias)))
+  (fs/move path (str (root_folder) "/res/" alias "/")))
 
 (defn copy_to_central
   "Copy a file to central repository"
@@ -190,7 +190,7 @@
    only include resources of this type, if type is not nil"
   [author type]
   ;; todo
-  )
+  "stub!")
 
 ;; COMMENT-MB: Ist das notwendig?
 
@@ -203,8 +203,10 @@
 ;; DUMMY-FUNCTIONS TO GRANT FUNCTIONALLITY
 
 
-(defn list_all_res []
-  (do))
+(defn list_all_res
+  []
+  (do)
+  "stub!")
 
 (defn remove_local []
   (do))

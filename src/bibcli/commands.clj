@@ -6,14 +6,18 @@
 (defn config
   [{:keys [autocommit autopush] :as _args}]
   (if (boolean? autocommit)
-    (system/add_data_config :autocommit autocommit))
+    (system/add_data_config :autocommit autocommit)
+    ())
   (if (boolean? autopush)
-    (system/add_data_config :autopush autopush)))
+    (system/add_data_config :autopush autopush)
+    ()))
 
 (defn init_central
   [{:keys [git] :as _args}]
   (system/init_central)
-  (if git (git/init_central) ()))
+  (if git
+    (git/init_central)
+    ()))
 
 (defn _add_central
   ([path bibtex alias type commit push move]
@@ -29,7 +33,7 @@
                (do (system/move_to_central alias path)
                    (system/move_to_central alias bibtex))
                (do (system/copy_to_central alias path)
-                   (system/move_to_central alias bibtex)))
+                   (system/copy_to_central alias bibtex)))
              (_add_central commit push))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
@@ -39,7 +43,7 @@
            (if move
              (system/move_to_central alias path)
              (system/copy_to_central alias path))
-           (system/create_file_central alias "bib" "content") ;; todo content: (bibtex/create_dummy (if (not (nil? type) type :misc)))
+           (system/create_file_central alias "bib" (bibtex/print_format (if (not (nil? type)) type :misc)))
            (_add_central commit push))
        (println "ERROR: Bibtex file or alias is required."))))
 
@@ -66,8 +70,8 @@
 (defn list_central
   [{:keys [author type] :as _args}]
   (if (string? author)
-    (system/list_all_res_from_author author type)
-    (system/list_all_res)))
+    (println (system/list_all_res_from_author author type))
+    (println (system/list_all_res))))
 
 (defn init_local
   [{:keys [alias] :as _args}]

@@ -86,11 +86,15 @@
   "Get alias ob bibtex entry"
   [bibtex]
   ;; todo
-  )
+  "test-alias")
 
 (defn print_format
-  [bibtex]
-  "todo")
+  "todo"
+  [type]
+  (print "print_format not implemented!")
+  (print " type was ")
+  (println type)
+  "print format")
 
 ;; (defn requirements_satisfied?
 ;;   [bibtex]
