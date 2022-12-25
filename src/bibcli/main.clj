@@ -87,8 +87,7 @@
                           :as "remove resource with this alias"
                           :type :string
                           :multiple true
-                          :default :present
-                          :spec ::system/ALIASES-EXISTS}]
+                          :default :present}]
                   :runs cmd/remove_central}
                  {:command "listc"
                   :description "list resources"

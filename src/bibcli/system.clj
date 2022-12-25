@@ -7,6 +7,7 @@
 (defn root_folder
   []
   (str (fs/home) "/.bibcli"))
+
 (defn config_json
   []
   (str (fs/home) "/.bibcli.json"))
@@ -17,11 +18,11 @@
 
 ;;;; Utils
 
-;; Returns true if f exists.
-(defn path_valid? [path] (fs/exists? path))
+(defn path_valid?
+  [path]
+  (fs/exists? path))
 
 (defn res_exists? [alias]
-  ;; Return true or false
   (path_valid? (str (root_folder) "/res/" alias)))
 
 (defn multiple_res_exist? [aliases]
@@ -40,6 +41,15 @@
   (fs/create-dirs (str (root_folder) "/res"))
   (init_config))
 
+(defn central_exists?
+  []
+  (fs/exists? (str (root_folder) "/res")))
+
+(defn get_path
+  "Return path of the resource of a given alias"
+  [alias]
+  (str (root_folder) "/res/" alias "/"))
+
 (defn ^:private delete_central
   "Delete initial folder structure"
   []
@@ -48,10 +58,7 @@
 (defn remove_central
   "Remove folder of alias"
   [alias]
-  (if
-   (res_exists? alias)
-    (fs/delete-tree (str (root_folder) "/res/" alias)))
-  nil)
+  (fs/delete-tree (str (root_folder) "/res/" alias)))
 
 (defn create_central
   "Create a folder in central repository"
@@ -73,13 +80,10 @@
   (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) [content]))
 
 (defn list_aliases
-  "Return a list with names of all available aliases
-   Check project directory exists"
+  "Return a list with names of all available aliases"
   []
-  (if (fs/exists? (str (root_folder) "/res"))
-    (let [FILTER_FOLDER (map str (filter fs/directory? (fs/list-dir (str (root_folder) "/res"))))]
-      (map #(clojure.string/replace %1 (str (root_folder) "/res/") "") FILTER_FOLDER))
-    nil))
+  (let [FILTER_FOLDER (map str (filter fs/directory? (fs/list-dir (str (root_folder) "/res"))))]
+    (map #(clojure.string/replace %1 (str (root_folder) "/res/") "") FILTER_FOLDER)))
 
 ;;;; Handle config content
 
@@ -116,7 +120,7 @@
   (let [readMap (read_config)]
     (if (readMap key) (write-config (dissoc readMap (if (keyword? key) (name key) key))) nil)))
 
-;;;; Bibtex related
+;;;; Local project
 
 (defn bib-ref_exists?
   "Checks if a bib-ref file exists in current folder"
@@ -153,7 +157,7 @@
     (fs/write-lines (fs/file (local_bib-ref_path)) new_refs {:append false})))
 
 
-;;;; MACRO-FUNCTIONS
+;;;; Validation specs
 
 (e/def ::PATH-VALID
   #(path_valid? %)
@@ -171,26 +175,4 @@
   #(not (res_exists? %))
   "alias does already exist in repository")
 
-;;;; NOT IMPLEMENTED
 
-;; COMMENT-MB: Ist das notwendig?
-
-(defn get_path
-  "Return path of the resource of a given alias"
-  [alias]
-  ;; todo
-  )
-
-;; DUMMY-FUNCTIONS TO GRANT FUNCTIONALLITY
-
-
-(defn list_all_res
-  []
-  (do)
-  "stub!")
-
-(defn remove_local []
-  (do))
-
-(defn get_path []
-  (do))

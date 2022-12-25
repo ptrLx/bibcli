@@ -65,14 +65,20 @@
 
 (defn remove_central
   [{:keys [alias] :as _args}]
-  (doseq [i alias] (system/remove_central i)))
+  (doseq [i alias]
+    (if (system/res_exists? i)
+      (system/remove_central i)
+      (println (str "WARN: Alias \"" i "\" does not exist.")))))
 
 (defn list_central
   [{:keys [] :as _args}]
   ;; (if (string? author)
   ;;   (println (system/list_all_res_from_author author type))
   ;;   (println (system/list_all_res)))
-  (println (system/list_all_res)))
+  (if (system/central_exists?)
+    (doseq [alias (system/list_aliases)]
+      (println alias))
+    (println "WARN: No central repository found.")))
 
 (defn init_local
   [{:keys [alias] :as _args}]
@@ -96,14 +102,12 @@
     (system/remove_aliases_bib-ref alias)
     (println "WARN: No bib-ref file exists.")))
 
-
-
 (defn path
   [{:keys [alias] :as _args}]
-  ;; (println (system/get_path alias))
-  )
+  (println (system/get_path alias)))
 
 (defn generate
   [{:keys [out] :as _args}]
   ;; (system/generate_local out)
+  ;;todo
   )
