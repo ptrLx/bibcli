@@ -68,29 +68,35 @@
   (doseq [i alias] (system/remove_central i)))
 
 (defn list_central
-  [{:keys [author type] :as _args}]
-  (if (string? author)
-    (println (system/list_all_res_from_author author type))
-    (println (system/list_all_res))))
+  [{:keys [] :as _args}]
+  ;; (if (string? author)
+  ;;   (println (system/list_all_res_from_author author type))
+  ;;   (println (system/list_all_res)))
+  (println (system/list_all_res)))
 
 (defn init_local
   [{:keys [alias] :as _args}]
-  (system/create_bib-ref alias))
+  (if (not (system/bib-ref_exists?))
+    (system/create_bib-ref alias)
+    (do
+      (println "WARN: Bib-ref file already exists. Adding aliases...")
+      (system/add_aliases_bib-ref alias))))
 
 (defn add_local
-  [{:keys [alias authors] :as _args}]
-;; todo get all aliases from all authors and add to aliases-set
-  ;; (let [authors_set (set authors)]
-
-  ;; )
-  ;; (def testasdf (
-  ;;                map #(system/list_all_res_from_author % nil) authors))
-
-  (system/append_bib-ref alias))
+  [{:keys [alias] :as _args}]
+  (if (system/bib-ref_exists?)
+    (system/add_aliases_bib-ref alias)
+    (do
+      (println "WARN: No bib-ref file exists. Creating one...")
+      (system/create_bib-ref alias))))
 
 (defn remove_local
   [{:keys [alias] :as _args}]
-  (system/remove_aliases_bib-ref alias))
+  (if (system/bib-ref_exists?)
+    (system/remove_aliases_bib-ref alias)
+    (println "WARN: No bib-ref file exists.")))
+
+
 
 (defn path
   [{:keys [alias] :as _args}]

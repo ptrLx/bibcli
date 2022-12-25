@@ -97,12 +97,6 @@ bibcli init --resources <alias 1> <alias 2> <alias 3>
 bibcli list
 ```
 
-### Find resources
-
-```bash
-bibcli list author "Einstein"
-```
-
 ### Add resources to a project
 
 ```bash
@@ -110,7 +104,7 @@ bibcli add <alias list>
 ```
 
 ```bash
-bibcli add --author "Einstein"
+bibcli add -a <alias list>
 ```
 
 ### Remove

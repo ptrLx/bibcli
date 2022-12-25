@@ -92,16 +92,15 @@
                   :runs cmd/remove_central}
                  {:command "listc"
                   :description "list resources"
-                  :examples ["bibcli listc"
-                             "bibcli listc --author einstein --type misc"]
-                  :opts        [{:option "author"
-                                 :as "list only resources of this author"
-                                 :type :string}
-                                {:option "type"
-                                 :short "t"
-                                 :as "list only resources of this bibtex type"
-                                 :type (set (keys bibtex/bibtex_types))
-                                 :default nil}]
+                  :examples ["bibcli listc"]
+                ;;   :opts        [{:option "author"
+                ;;                  :as "list only resources of this author"
+                ;;                  :type :string}
+                ;;                 {:option "type"
+                ;;                  :short "t"
+                ;;                  :as "list only resources of this bibtex type"
+                ;;                  :type (set (keys bibtex/bibtex_types))
+                ;;                  :default nil}]
                   :runs cmd/list_central}
                  {:command     "init"
                   :description "initialize a path as project. This will create a bib-ref file"
@@ -111,23 +110,24 @@
                                  :as "alias of resource you want to have in this project"
                                  :type :string
                                  :multiple true
-                                ;; todo :spec ::system/CAN-INIT
-                                 }]
+                                 :spec  ::system/ALIASES-EXISTS}]
                   :runs cmd/init_local}
                  {:command "add"
                   :description "add resource to current project"
                   :examples ["bibcli add -a <alias 1> -a <alias 2>"
-                             "bibcli add --author einstein"]
+                        ;;      "bibcli add --author einstein"
+                             ]
                   :opts [{:option "alias"
                           :short "a"
                           :as "add resource with this alias"
                           :type :string
                           :multiple true
-                          :spec ::system/LIST-ALIAS-EXISTS}
-                         {:option "author"
-                          :as "add all resources from this authors"
-                          :type :string
-                          :multiple true}]
+                          :spec ::system/ALIASES-EXISTS}
+                        ;;  {:option "author"
+                        ;;   :as "add all resources from this authors"
+                        ;;   :type :string
+                        ;;   :multiple true}
+                         ]
                   :runs cmd/add_local}
                  {:command "rm"
                   :description "delete resources from project"
@@ -137,7 +137,7 @@
                           :as "delete resources with this alias from current project"
                           :type :string
                           :multiple true
-                          :spec ::system/LIST-ALIAS-EXISTS}]
+                          :spec ::system/ALIASES-EXISTS}]
                   :runs cmd/remove_local}
                  {:command "path"
                   :description "get path of a resource"

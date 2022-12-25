@@ -1,7 +1,8 @@
 (ns bibcli.system
   (:require [expound.alpha :as e]
             [babashka.fs :as fs]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.set :as cset]))
 
 (defn root_folder
   []
@@ -9,6 +10,10 @@
 (defn config_json
   []
   (str (fs/home) "/.bibcli.json"))
+
+(defn local_bib-ref_path
+  []
+  "./bib-ref")
 
 ;;;; Utils
 
@@ -116,46 +121,37 @@
 (defn bib-ref_exists?
   "Checks if a bib-ref file exists in current folder"
   []
-  ;; todo
-  true)
+  (fs/exists? (local_bib-ref_path)))
 
 (e/def ::BIB-REF-EXISTS
   (fn [_outfile]
     (bib-ref_exists?))
   "No bib-ref file found in current folder")
 
-(e/def ::BIB-NOT-REF-EXISTS
+(e/def ::BIB-REF-NOT-EXISTS
   (fn [_outfile]
     (not (bib-ref_exists?)))
   "Bib-ref file already exists in current folder. Use `bibcli add` instead")
 
-;; (s/def ::CAN-INIT
-;;   (s/and (vector? ::BIB-NOT-REF-EXISTS)))
-
-;; (e/def ::CAN-INIT
-;;   (fn [a]
-;;     (println a)
-;;     true)
-;;   "test")
-
 (defn create_bib-ref
   "Write aliases per line to ./bib-ref"
   [aliases]
-  ;; todo
-  )
-
-(defn append_bib-ref
-  "Append aliases per line to ./bib-ref. Avoid duplicates"
-  ;; todo Avoid duplicates by reading current aliases to a set first.
-  [aliases]
-  ;; todo
-  )
+  (fs/write-lines (fs/file (local_bib-ref_path)) aliases))
 
 (defn remove_aliases_bib-ref
-  "Remove aliases from bib-ref file if it exists"
+  "Remove aliases from bib-ref"
   [aliases]
-  ;; todo
-  )
+  (let [current_refs (fs/read-all-lines (fs/file (local_bib-ref_path)))
+        new_refs (cset/difference (set current_refs) (set aliases))]
+    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs)))
+
+(defn add_aliases_bib-ref
+  "Add aliases to bib-ref"
+  [aliases]
+  (let [current_refs (fs/read-all-lines (fs/file (local_bib-ref_path)))
+        new_refs (cset/union (set current_refs) (set aliases))]
+    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs {:append false})))
+
 
 ;;;; MACRO-FUNCTIONS
 
@@ -167,7 +163,7 @@
   #(res_exists? %)
   "alias does not exist in repository")
 
-(e/def ::ALIASES-EXISTS ;;todo macro magic with ::ALIAS-EXISTS
+(e/def ::ALIASES-EXISTS
   #(multiple_res_exist? %)
   "alias does not exist in repository")
 
@@ -175,22 +171,7 @@
   #(not (res_exists? %))
   "alias does already exist in repository")
 
-(e/def ::LIST-ALIAS-EXISTS
-  (fn [aliases]
-    (;; todo loop through aliases and call alias_exists?. if one does not, return false
-     = 1 1))
-  "alias not found")
-
 ;;;; NOT IMPLEMENTED
-
-;; COMMENT_MB: Das fällt unter Kategorie Bibtex?
-
-(defn list_all_res_from_author
-  "Scan all resources and return a set of aliases for given author.
-   only include resources of this type, if type is not nil"
-  [author type]
-  ;; todo
-  "stub!")
 
 ;; COMMENT-MB: Ist das notwendig?
 
