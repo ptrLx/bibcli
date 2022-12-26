@@ -2,7 +2,10 @@
   (:require [expound.alpha :as e]
             [babashka.fs :as fs]
             [clojure.data.json :as json]
-            [clojure.set :as cset]))
+            [clojure.set :as cset]
+            [clojure.string :as str]))
+
+;;;; Consts
 
 (defn root_folder
   []
@@ -83,7 +86,12 @@
   "Return a list with names of all available aliases"
   []
   (let [FILTER_FOLDER (map str (filter fs/directory? (fs/list-dir (str (root_folder) "/res"))))]
-    (map #(clojure.string/replace %1 (str (root_folder) "/res/") "") FILTER_FOLDER)))
+    (set (map #(clojure.string/replace % (str (root_folder) "/res/") "") FILTER_FOLDER))))
+
+(defn get_bib
+  "Get content of bib file corresponding to an alias"
+  [alias]
+  (fs/read-all-lines (fs/file (str (root_folder) "/res/" alias "/bib"))))
 
 ;;;; Handle config content
 
@@ -122,10 +130,41 @@
 
 ;;;; Local project
 
+(defn get_current_refs
+  "Return set of references"
+  []
+  (set (fs/read-all-lines (fs/file (local_bib-ref_path)))))
+
 (defn bib-ref_exists?
   "Checks if a bib-ref file exists in current folder"
   []
   (fs/exists? (local_bib-ref_path)))
+
+(defn create_bib-ref
+  "Write aliases per line to ./bib-ref"
+  [aliases]
+  (fs/write-lines (fs/file (local_bib-ref_path)) aliases))
+
+(defn remove_aliases_bib-ref
+  "Remove aliases from bib-ref"
+  [aliases]
+  (let [new_refs (cset/difference (get_current_refs) aliases)]
+    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs)))
+
+(defn add_aliases_bib-ref
+  "Add aliases to bib-ref"
+  [aliases]
+  (let [new_refs (cset/union (get_current_refs) aliases)]
+    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs {:append false})))
+
+(defn generate_local
+  "Compose a bibtex file out of a set of references"
+  [outputfile refs]
+  (fs/delete-if-exists outputfile)
+  (doseq [ref refs]
+    (fs/write-lines (fs/file outputfile) (get_bib ref) {:append true :create true})))
+
+;;;; Validation specs
 
 (e/def ::BIB-REF-EXISTS
   (fn [_outfile]
@@ -136,28 +175,6 @@
   (fn [_outfile]
     (not (bib-ref_exists?)))
   "Bib-ref file already exists in current folder. Use `bibcli add` instead")
-
-(defn create_bib-ref
-  "Write aliases per line to ./bib-ref"
-  [aliases]
-  (fs/write-lines (fs/file (local_bib-ref_path)) aliases))
-
-(defn remove_aliases_bib-ref
-  "Remove aliases from bib-ref"
-  [aliases]
-  (let [current_refs (fs/read-all-lines (fs/file (local_bib-ref_path)))
-        new_refs (cset/difference (set current_refs) (set aliases))]
-    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs)))
-
-(defn add_aliases_bib-ref
-  "Add aliases to bib-ref"
-  [aliases]
-  (let [current_refs (fs/read-all-lines (fs/file (local_bib-ref_path)))
-        new_refs (cset/union (set current_refs) (set aliases))]
-    (fs/write-lines (fs/file (local_bib-ref_path)) new_refs {:append false})))
-
-
-;;;; Validation specs
 
 (e/def ::PATH-VALID
   #(path_valid? %)
@@ -174,5 +191,3 @@
 (e/def ::ALIAS-NOT-EXISTS
   #(not (res_exists? %))
   "alias does already exist in repository")
-
-

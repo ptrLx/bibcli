@@ -86,12 +86,12 @@
     (system/create_bib-ref alias)
     (do
       (println "WARN: Bib-ref file already exists. Adding aliases...")
-      (system/add_aliases_bib-ref alias))))
+      (system/add_aliases_bib-ref (set alias)))))
 
 (defn add_local
   [{:keys [alias] :as _args}]
   (if (system/bib-ref_exists?)
-    (system/add_aliases_bib-ref alias)
+    (system/add_aliases_bib-ref (set alias))
     (do
       (println "WARN: No bib-ref file exists. Creating one...")
       (system/create_bib-ref alias))))
@@ -99,7 +99,7 @@
 (defn remove_local
   [{:keys [alias] :as _args}]
   (if (system/bib-ref_exists?)
-    (system/remove_aliases_bib-ref alias)
+    (system/remove_aliases_bib-ref (set alias))
     (println "WARN: No bib-ref file exists.")))
 
 (defn path
@@ -108,6 +108,10 @@
 
 (defn generate
   [{:keys [out] :as _args}]
-  ;; (system/generate_local out)
-  ;;todo
-  )
+  (if (system/bib-ref_exists?)
+    (system/generate_local out (filter #(if (system/res_exists? %)
+                                          (do true)
+                                          (do (println (str "WARN: Ref \""  % "\" not found in central repository."))
+                                              false))
+                                       (system/get_current_refs)))
+    (println "WARN: No bib-ref file found.")))

@@ -156,7 +156,8 @@
                           :as "output path"
                           :type :string
                           :default "bib"
-                          :spec ::system/BIB-REF-EXISTS}]
+                        ;;   :spec ::system/BIB-REF-EXISTS
+                          }]
                   :runs cmd/generate}]})
 
 (defn -main [& _args]
