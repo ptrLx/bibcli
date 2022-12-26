@@ -92,14 +92,14 @@
                  {:command "listc"
                   :description "list resources"
                   :examples ["bibcli listc"]
-                ;;   :opts        [{:option "author"
-                ;;                  :as "list only resources of this author"
-                ;;                  :type :string}
-                ;;                 {:option "type"
-                ;;                  :short "t"
-                ;;                  :as "list only resources of this bibtex type"
-                ;;                  :type (set (keys bibtex/bibtex_types))
-                ;;                  :default nil}]
+                ;;//   :opts        [{:option "author"
+                ;;//                  :as "list only resources of this author"
+                ;;//                  :type :string}
+                ;;//                 {:option "type"
+                ;;//                  :short "t"
+                ;;//                  :as "list only resources of this bibtex type"
+                ;;//                  :type (set (keys bibtex/bibtex_types))
+                ;;//                  :default nil}]
                   :runs cmd/list_central}
                  {:command     "init"
                   :description "initialize a path as project. This will create a bib-ref file"
@@ -109,23 +109,25 @@
                                  :as "alias of resource you want to have in this project"
                                  :type :string
                                  :multiple true
-                                 :spec  ::system/ALIASES-EXISTS}]
+                                ;;//  :spec  ::system/ALIASES-EXISTS
+                                 }]
                   :runs cmd/init_local}
                  {:command "add"
                   :description "add resource to current project"
                   :examples ["bibcli add -a <alias 1> -a <alias 2>"
-                        ;;      "bibcli add --author einstein"
+                        ;;//      "bibcli add --author einstein"
                              ]
                   :opts [{:option "alias"
                           :short "a"
                           :as "add resource with this alias"
                           :type :string
                           :multiple true
-                          :spec ::system/ALIASES-EXISTS}
-                        ;;  {:option "author"
-                        ;;   :as "add all resources from this authors"
-                        ;;   :type :string
-                        ;;   :multiple true}
+                          ;;// :spec ::system/ALIASES-EXISTS
+                          }
+                        ;;//  {:option "author"
+                        ;;//   :as "add all resources from this authors"
+                        ;;//   :type :string
+                        ;;//   :multiple true}
                          ]
                   :runs cmd/add_local}
                  {:command "rm"
@@ -156,7 +158,7 @@
                           :as "output path"
                           :type :string
                           :default "bib"
-                        ;;   :spec ::system/BIB-REF-EXISTS
+                        ;;//   :spec ::system/BIB-REF-EXISTS
                           }]
                   :runs cmd/generate}]})
 

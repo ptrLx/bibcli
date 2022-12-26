@@ -3,6 +3,15 @@
             [bibcli.git :as git]
             [bibcli.bibtex :as bibtex]))
 
+(defn ^:private filter_existence
+  [aliases]
+  (filter #(if (system/res_exists? %)
+             (do true)
+             (do (println (str "WARN: Ressource \""  % "\" not found in central repository."))
+                 false))
+          (set aliases)))
+
+
 (defn config
   [{:keys [autocommit autopush] :as _args}]
   (if (boolean? autocommit)
@@ -14,12 +23,14 @@
 
 (defn init_central
   [{:keys [git] :as _args}]
-  (system/init_central)
-  (if git
-    (git/init_central)
-    ()))
+  (if (system/central_exists?)
+    (println "WARN: Central repository already exists.")
+    (do (system/init_central)
+        (if git
+          (git/init_central)
+          ()))))
 
-(defn _add_central
+(defn ^:private _add_central
   ([path bibtex alias type commit push move]
    (if (not (nil? bibtex))
     ;;  bibtex file provided
@@ -72,9 +83,9 @@
 
 (defn list_central
   [{:keys [] :as _args}]
-  ;; (if (string? author)
-  ;;   (println (system/list_all_res_from_author author type))
-  ;;   (println (system/list_all_res)))
+  ;;// (if (string? author)
+  ;;//   (println (system/list_all_res_from_author author type))
+  ;;//   (println (system/list_all_res)))
   (if (system/central_exists?)
     (doseq [alias (system/list_aliases)]
       (println alias))
@@ -86,12 +97,12 @@
     (system/create_bib-ref alias)
     (do
       (println "WARN: Bib-ref file already exists. Adding aliases...")
-      (system/add_aliases_bib-ref (set alias)))))
+      (system/add_aliases_bib-ref (filter_existence alias)))))
 
 (defn add_local
   [{:keys [alias] :as _args}]
   (if (system/bib-ref_exists?)
-    (system/add_aliases_bib-ref (set alias))
+    (system/add_aliases_bib-ref (filter_existence alias))
     (do
       (println "WARN: No bib-ref file exists. Creating one...")
       (system/create_bib-ref alias))))
@@ -109,9 +120,5 @@
 (defn generate
   [{:keys [out] :as _args}]
   (if (system/bib-ref_exists?)
-    (system/generate_local out (filter #(if (system/res_exists? %)
-                                          (do true)
-                                          (do (println (str "WARN: Ref \""  % "\" not found in central repository."))
-                                              false))
-                                       (system/get_current_refs)))
+    (system/generate_local out (filter_existence (system/get_current_refs)))
     (println "WARN: No bib-ref file found.")))
