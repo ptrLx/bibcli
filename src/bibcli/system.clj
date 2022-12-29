@@ -3,7 +3,8 @@
             [babashka.fs :as fs]
             [clojure.data.json :as json]
             [clojure.set :as cset]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.java.shell :only [sh]]))
 
 ;;;; Consts
 
@@ -30,6 +31,23 @@
 
 (defn multiple_res_exist? [aliases]
   (eval `(and ~@(map res_exists? aliases))))
+
+(defn git_init_central
+  []
+  (clojure.java.shell/sh "git" "init" (root_folder)))
+
+(defn git_central_is_repo?
+  []
+  (fs/exists? (str (root_folder) "/.git/")))
+
+(defn git_commit_add_res
+  [alias]
+  (clojure.java.shell/sh "git" "-C" (root_folder) "add" (str "res/" alias "/*"))
+  (clojure.java.shell/sh "git" "-C" (root_folder) "commit" "-m" (str alias)))
+
+(defn git_push_central
+  []
+  (clojure.java.shell/sh "git" "-C" (root_folder) "push"))
 
 ;;;; General project
 
@@ -71,16 +89,16 @@
 (defn move_to_central
   "Move a file to central repository"
   [alias path]
-  (fs/move path (str (root_folder) "/res/" alias "/")))
+  (str (fs/move path (str (root_folder) "/res/" alias "/"))))
 
 (defn copy_to_central
   "Copy a file to central repository"
   [alias path]
-  (fs/copy path (str (root_folder) "/res/" alias)))
+  (str (fs/copy path (str (root_folder) "/res/" alias))))
 
 (defn create_file_central
   [alias filename content]
-  (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) [content]))
+  (str (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) [content])))
 
 (defn list_aliases
   "Return a list with names of all available aliases"
@@ -191,3 +209,13 @@
 (e/def ::ALIAS-NOT-EXISTS
   #(not (res_exists? %))
   "alias does already exist in repository")
+
+(e/def ::CENTRAL-IS-REPO
+  #(git_central_is_repo?)
+  "Central repository has been already initialized with git")
+
+(e/def ::CENTRAL-IS-NOT-REPO
+  #(if %
+     (not (git_central_is_repo?))
+     ())
+  "Central repository has not been initialized with git")

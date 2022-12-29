@@ -1,6 +1,5 @@
 (ns bibcli.commands
   (:require [bibcli.system :as system]
-            [bibcli.git :as git]
             [bibcli.bibtex :as bibtex]))
 
 (defn ^:private filter_existence
@@ -27,7 +26,7 @@
     (println "WARN: Central repository already exists.")
     (do (system/init_central)
         (if git
-          (git/init_central)
+          (system/git_init_central)
           ()))))
 
 (defn ^:private _add_central
@@ -42,10 +41,10 @@
              (system/create_central alias)
              (if move
                (do (system/move_to_central alias path)
-                   (system/move_to_central alias bibtex))
+                   (println (system/move_to_central alias bibtex)))
                (do (system/copy_to_central alias path)
-                   (system/copy_to_central alias bibtex)))
-             (_add_central commit push))
+                   (println (system/copy_to_central alias bibtex))))
+             (_add_central commit push alias))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
      ;; alias provided
@@ -54,16 +53,20 @@
            (if move
              (system/move_to_central alias path)
              (system/copy_to_central alias path))
-           (system/create_file_central alias "bib" (bibtex/print_format (if (not (nil? type)) type :misc)))
-           (_add_central commit push))
+           (println  (system/create_file_central alias "bib" (bibtex/print_format (if (not (nil? type)) type :misc))))
+           (_add_central commit push alias))
        (println "ERROR: Bibtex file or alias is required."))))
 
-  ([commit push]
+  ([commit push alias]
    (if (or commit (system/val_from_key_config :commit))
-     (do (git/commit_add_res alias)
-         (if (or push (system/val_from_key_config :commit))
-           (git/push_central)
-           ()))
+     (if (system/git_central_is_repo?)
+       (do (system/git_commit_add_res alias)
+           (if (or push (system/val_from_key_config :commit))
+             (system/git_push_central)
+             ()))
+       (if commit
+         (println "WARN: No git repository found in central.")
+         ()))
      ())))
 
 (defn add_central

@@ -2,7 +2,6 @@
   (:require [cli-matic.core :as cli]
             [bibcli.commands :as cmd]
             [bibcli.bibtex :as bibtex]
-            [bibcli.git :as git]
             [bibcli.system :as system]))
 
 (def ^:private opts_add_move

@@ -4,10 +4,10 @@ A simple tool to manage your bibliography resources locally.
 
 ## Features
 
-* Central repository for managing all resources
-* Metadata storage in Bib-Tex format
+* central repository for management of all resources
+* metadata storage in bibtex format
 * project specific reference management
-* Selective Bib-Tex export
+* selective bibtex generation for projects
 * Git integration
 
 ## How?
@@ -15,7 +15,7 @@ A simple tool to manage your bibliography resources locally.
 BibCLI will create a central repository of all resources in `~/.bibcli`.
 It will store all resources and bibtex files with metadata.
 
-A specific project refers to resources in your central repository with `bib-ref`.
+A specific project refers to resources from your central repository with a `bib-ref` file.
 BibCLI can generate a project specific bibtex file form the `bib-ref`.
 
 ## Prerequisites
@@ -27,6 +27,7 @@ Git is set up correctly.
 ### Babashka
 
 * Install babashka: `bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)`
+
 * Execute with
 
   ```bash
@@ -100,17 +101,13 @@ bibcli list
 ### Add resources to a project
 
 ```bash
-bibcli add <alias list>
-```
-
-```bash
-bibcli add -a <alias list>
+bibcli add -a <alias> -a <alias> -a <alias>
 ```
 
 ### Remove
 
 ```bash
-bibcli rm <alias list>
+bibcli rm -a <alias> -a <alias> -a <alias>
 ```
 
 ### Generate a .bib file from a file
@@ -129,13 +126,12 @@ bibcli path <alias name>
 
 ```
 /.bibcli
-|-.git
+|-/.git
 |-/res
-  |-/alias-name
+  |-/<alias-name>
     |-/assets
     |-<resource>
     |-bib
-    |-tags
 .bibcli.json
 ```
 
@@ -156,16 +152,7 @@ bibcli path <alias name>
 <alias 3>
 ```
 
-### ~/.bibcli/alias-name/tags
-
-contains personal tagging information
-
-```
-disagree
-wrong
-```
-
-## Dev environment
+<!-- ## Dev environment
 
 Required:
 
@@ -176,4 +163,4 @@ Get started:
 
 * Install the remote-containers extension
 * Start the dev container
-* Start Calva Repl in VS Code
+* Start Calva Repl in VS Code -->
