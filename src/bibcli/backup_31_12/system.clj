@@ -4,7 +4,7 @@
             [clojure.data.json :as json]
             [flatland.ordered.map]))
 
-;; (use 'flatland.ordered.map)
+(use 'flatland.ordered.map)
 
 (defn root_folder
   []
@@ -153,10 +153,19 @@
   ;; Spaces between are currently not allowed 
   (if (re-matches #"^@[a-zA-Z]+\{[a-zA-Z0-9_:-]+,$" line)
     (do
+
+      (comment
       { "entrytype"
        (re-find #"(?<=@)[a-zA-Z]+" line)
        "citekey"
-       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) })      
+       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) })
+
+      (ordered-map "entrytype"
+       (re-find #"(?<=@)[a-zA-Z]+" line)
+       "citekey"
+       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) )
+
+      )      
     nil
     ))
 
@@ -169,10 +178,20 @@
     (do
       ;; Attributes should only consists of letters
       ;; Values can consist of all printable ascii letters
+      (comment
       { (clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
        ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
        (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")
+       })
+
+      (ordered-map
+       { (clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
+       ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
+       (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")
        }
+       )
+
+
       )
     nil
     ))
@@ -218,12 +237,13 @@
 (defn parse_bib_file [path]
   (let [read_file (babashka.fs/read-all-lines path)
         match_indeces (keep-indexed #(when %2 %1) (map bibcli.system/bib_check_head read_file))
-        res_object_list (reduce #(conj %1 (reduce parse_bib_object {:current_state 0 :current_line %2 :payload {}} (drop %2 read_file))) [] match_indeces) 
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces) 
         ]
     res_object_list
     )
   )
 
+;; !!!
 ;; To-Do: Do not use it! Clean up here, old ideas
 (defn parse_bib_file_proto [path]
 
