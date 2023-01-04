@@ -2,7 +2,7 @@
   (:require [bibcli.system :as system]
             [bibcli.bibtex :as bibtex]))
 
-(defn ^:private filter_existence
+(defn- filter_existence
   [aliases]
   (filter #(if (system/res_exists? %)
              (do true)
@@ -29,7 +29,7 @@
           (system/git_init_central)
           ()))))
 
-(defn ^:private _add_central
+(defn- _add_central
   ([path bibtex alias type commit push move]
    (if (not (nil? bibtex))
     ;;  bibtex file provided

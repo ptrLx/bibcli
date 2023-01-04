@@ -71,7 +71,7 @@
   [alias]
   (str (root_folder) "/res/" alias "/"))
 
-(defn ^:private delete_central
+(defn- delete_central
   "Delete initial folder structure"
   []
   (fs/delete-tree (root_folder)))
@@ -113,12 +113,12 @@
 
 ;;;; Handle config content
 
-(defn ^:private read_config
+(defn- read_config
   "Return a dictionary from json config"
   []
   (json/read (clojure.java.io/reader (config_json))))
 
-(defn ^:private keys_of_config
+(defn- keys_of_config
   "Return all keys from config"
   []
   (keys (read_config)))
@@ -128,7 +128,7 @@
   [key]
   ((read_config) key))
 
-(defn ^:private write-config
+(defn- write-config
   "Write with arg as map to config"
   [arg]
   (if (map? arg)

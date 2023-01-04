@@ -1,5 +1,7 @@
 (ns bibcli.bibtex
-  (:require [expound.alpha :as expound]))
+  (:require [expound.alpha :as expound]
+            ;;// [flatland.ordered.map]
+            [babashka.fs :as fs]))
 
 
 (def fields #{:address :annote :author :booktitle :Email :chapter :crossref :doi :edition :editor
@@ -89,10 +91,12 @@
   "test-alias")
 
 (defn print_format
-  "todo"
-  [type]
-  (print "print_format not implemented!")
-  (str "type is " type))
+  "generate a bibtex template according to a type"
+  [alias type]
+  ;; (print "print_format not implemented!")
+  (str "@" type " {" alias "\n"
+       (:required ((keyword "article") bibtex_types))
+       "}"))
 
 ;; (defn requirements_satisfied?
 ;;   [bibtex]
@@ -105,3 +109,96 @@
 ;;   )
 
 ;; (requirements_satisfied? {:type :book :alias "alias" :attributes {:author "Einstein"}})
+
+
+
+
+
+
+;;;; BIB TEX PARSING
+
+;; helpers
+(defn- bib_check_head [line]
+  "Helper function for bib_parser. Will return a map on success or nil on failure."
+
+  ;; Match for entrytype and citekey (head)
+  ;; Spaces between are currently not allowed 
+  (if (re-matches #"^@[a-zA-Z]+\{[a-zA-Z0-9_:-]+,$" line)
+    (do
+
+      (comment
+        {"entrytype"
+         (re-find #"(?<=@)[a-zA-Z]+" line)
+         "citekey"
+         (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
+
+      {"entrytype"
+       (re-find #"(?<=@)[a-zA-Z]+" line)
+       "citekey"
+       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
+    nil))
+
+;; Notice: r-value has to be written as string with double quotes!!!
+(defn- bib_get_body_line [line]
+  "Helper function for bib_parser. Will return a map on success or nil on failure."
+  ;; parse attribute and value from body
+  ;; check syntax: ATTRIBUTE = VALUE
+  (if (re-matches #"^\s*\t*[a-zA-Z]+\s*\t*=\s*\t*\".*\",*$" line)
+    (do
+      ;; Attributes should only consists of letters
+      ;; Values can consist of all printable ascii letters
+      (comment
+        {(clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
+       ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
+         (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")})
+
+      {(clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
+       ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
+       (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")})
+    nil))
+
+;; Actual parser
+(defn parse_bib_object [coll read_line]
+  "This function needs following datastructur as coll: {:current_state 0 :current_line 0 :payload {}} It returns a bib tex object as map in :payload and a :current_line counter to store reading position of the file. Use this function in combination with reduce as follows: (reduce parse_bib_object {:current_state 0 :current_line 0 :payload {}} read_file_as_coll)"
+  ;; Check: coll is a map?
+  (case (:current_state coll)
+    0 (do
+        (let [check_head_res (bib_check_head read_line)]
+          (if check_head_res
+            ;; Return new maps
+            (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_head_res)))
+            (do (println "Warning: Missmatch of head! Error in line" (inc (:current_line coll)))))))
+    1 (do
+        (let [check_body_res (bib_get_body_line read_line)]
+          (if check_body_res
+            ;; Return new map
+            (do (assoc coll :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_body_res)))
+            (if (= "}" read_line)
+                ;;end of object reading
+              (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll))))
+
+              (do (println "Warning: Missmatch of body! Error in line" (inc (:current_line coll))))))))
+      ;;2 (do (println "Finished object parsing.") coll)
+    2 (do coll)
+      ;; else
+    "Error: Wrong state!"))
+
+;; "/Users/blacksurface/Desktop/WiSe22_23/MFPM/bibcli/"
+;; "test2.bib"
+;; To-Do: Reihenfolge beim Output beachten !
+;; Fix: Lazy-Seq in normale Seq überführen, dann
+;; werden Elemente in Reihenfolge mit conj angehängt
+;; Ab einer bestimmten Länge der bibtext objecte fängt es an (mehr als 6 Einträge)
+;; hash-map's Reihenfolge kann sich ändern, wenn diese manipuliert wird, z.B. mit assoc
+;; Alternative Datenstrukturen eher schlecht
+;; -> Map gleich komplett erstellen und auf assoc/dissoc verzichten?
+;; Extra Implementierung für orderd-maps
+
+(defn parse_bib_str
+  [bib_str]
+  (let [match_indeces (keep-indexed #(when %2 %1) (map bib_check_head bib_str))
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object {:current_state 0 :current_line %2 :payload {}} (drop %2 bib_str))) [] match_indeces)]
+    res_object_list))
+
+(defn parse_bib_file [path]
+  (parse_bib_str (fs/read-all-lines path)))
