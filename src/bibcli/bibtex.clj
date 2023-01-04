@@ -8,8 +8,8 @@
               :howpublished :institution :journal :key :month :note :number :organization :pages
               :publisher :school :series :title :type :volume :year})
 
-;; (def types #{:article :book :booklet :conference :inbook :incollection :inproceedings
-;;              :manual :mastersthesis :misc :phdthesis :proceedings :techreport :unpublished})
+;;// (def types #{:article :book :booklet :conference :inbook :incollection :inproceedings
+;;//              :manual :mastersthesis :misc :phdthesis :proceedings :techreport :unpublished})
 
 (def bibtex_types {:article {:required #{:author :title :journal :year :volume}
                              :optional #{:number :pages :month :doi :note :key}}
@@ -39,16 +39,6 @@
                                 :optional #{:type :number :address :month :note :key}}
                    :unpublished {:required #{:author :title :note}
                                  :optional #{:month :year :key}}})
-;; bibtex structure
-  ;; {:type type
-  ;;  :alias alias
-  ;;  :attributes {:author "Einstein" :title ""}}
-
-(defn tokenize [bibtex]
-;; todo
-  )
-
-
 
 (defn parse_file
   "Read through a bibtex string and return as data"
@@ -68,28 +58,19 @@
 ;;   ")
 
 
-(defn bibtex_valid?
-  "Verify a string for being in bibtex formate"
-  [bibtex]
-  ;; todo
-  true)
 
-(expound/def ::BIBTEX-VALID
-  #(bibtex_valid? %)
-  "Invalid bibtex fiel")
 
 (defn type
   "Get type ob bibtex entry"
-  [bibtex]
-  ;; todo
-  )
+  [parsed_bibtex]
+  (get (:payload parsed_bibtex) "type"))
 
 (defn alias
   "Get alias ob bibtex entry"
-  [bibtex]
-  ;; todo
-  "test-alias")
+  [parsed_bibtex]
+  (get (:payload parsed_bibtex) "citekey"))
 
+;; todo
 (defn print_format
   "generate a bibtex template according to a type"
   [alias type]
@@ -98,6 +79,7 @@
        (:required ((keyword "article") bibtex_types))
        "}"))
 
+;; todo
 ;; (defn requirements_satisfied?
 ;;   [bibtex]
 
@@ -195,10 +177,21 @@
 ;; Extra Implementierung für orderd-maps
 
 (defn parse_bib_str
-  [bib_str]
-  (let [match_indeces (keep-indexed #(when %2 %1) (map bib_check_head bib_str))
-        res_object_list (reduce #(conj %1 (reduce parse_bib_object {:current_state 0 :current_line %2 :payload {}} (drop %2 bib_str))) [] match_indeces)]
+  [bib_lines]
+  (let [match_indeces (keep-indexed #(when %2 %1) (map bib_check_head bib_lines))
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object {:current_state 0 :current_line %2 :payload {}} (drop %2 bib_lines))) [] match_indeces)]
     res_object_list))
 
 (defn parse_bib_file [path]
   (parse_bib_str (fs/read-all-lines path)))
+
+
+(defn bibtex_valid?
+  "Verify a string for being in bibtex formate"
+  [bibtex]
+  ;; todo
+  true)
+
+(expound/def ::BIBTEX-VALID
+  #(bibtex_valid? %)
+  "Invalid bibtex fiel")

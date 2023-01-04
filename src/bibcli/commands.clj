@@ -37,14 +37,21 @@
            (println "WARNING: Ignoring alias as it is provided in bibtex file.")
            ())
          (if (bibtex/bibtex_valid? bibtex)
-           (let [alias (bibtex/alias bibtex)]
-             (system/create_central alias)
-             (if move
-               (do (system/move_to_central alias path)
-                   (println (system/move_to_central alias bibtex)))
-               (do (system/copy_to_central alias path)
-                   (println (system/copy_to_central alias bibtex))))
-             (_add_central commit push alias))
+           (let [bibtex_data (bibtex/parse_bib_file bibtex)]
+             (if (= (count bibtex_data) 0)
+               (throw (Exception. "ERROR: Bibtexfile invalid."))
+               ())
+             (if (> (count bibtex_data) 1)
+               (println "WARN: Ignoring multiple bibtex entries in provided bibtex file.")
+               ())
+             (let [bibtex_data_first (bibtex_data 0) alias (bibtex/alias bibtex_data_first)]
+               (system/create_central alias)
+               (if move
+                 (do (system/move_to_central alias path)
+                     (println (system/move_to_central alias bibtex)))
+                 (do (system/copy_to_central alias path)
+                     (println (system/copy_to_central alias bibtex))))
+               (_add_central commit push alias)))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
      ;; alias provided
