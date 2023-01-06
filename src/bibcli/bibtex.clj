@@ -40,27 +40,7 @@
                    :unpublished {:required #{:author :title :note}
                                  :optional #{:month :year :key}}})
 
-(defn parse_file
-  "Read through a bibtex string and return as data"
-  [bibtex])
-
-;; (parse_file
-;;  "
-;;   @Book{abramowitz+stegun,
-;;  author    = \"Milton {Abramowitz} and Irene A. {Stegun}\",
-;;  title     = \"Handbook of Mathematical Functions with
-;;               Formulas, Graphs, and Mathematical Tables\",
-;;  publisher = \"Dover\",
-;;  year      =  1964,
-;;  address   = \"New York City\",
-;;  edition   = \"ninth Dover printing, tenth GPO printing\"
-;; }
-;;   ")
-
-
-
-
-(defn type
+(defn bib_type
   "Get type ob bibtex entry"
   [parsed_bibtex]
   (get (:payload parsed_bibtex) "type"))
@@ -70,38 +50,38 @@
   [parsed_bibtex]
   (get (:payload parsed_bibtex) "citekey"))
 
-;; todo
+(defn- bib_object_to_string
+  "Converting a map which represents a valid bib text to a list of formated strings"
+  [bib_object]
+
+  (let [body_data (dissoc bib_object "entrytype" "citekey")]
+    (apply conj
+           (conj [] (format "@%s{%s," (name (bib_object "entrytype")) (bib_object "citekey")))
+           (conj
+            (vec
+             (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
+
+(defn- bib_gen_template
+  "Enter entrytype, citekey as string and a set of keys."
+  [entrytype citekey coll]
+
+  ;; Return a new map with corresponding entrytype and citekey
+  ;; and the rest of keys with empty string value ""
+  (merge {"entrytype" entrytype  "citekey" citekey}
+         (reduce #(assoc %1 (name %2) "") {} coll)))
+
 (defn print_format
-  "generate a bibtex template according to a type"
+  "Generate a bibtex template according to a type"
   [alias type]
-  ;; (print "print_format not implemented!")
-  (str "@" type " {" alias "\n"
-       (:required ((keyword "article") bibtex_types))
-       "}"))
-
-;; todo
-;; (defn requirements_satisfied?
-;;   [bibtex]
-
-;;   flag bool = false
-
-;;   (let [required ((bibtex_types (bibtex :type)) :require)])
-
-;;   ;; if required props are not present in attirbutes => open editor to fill in manually
-;;   )
-
-;; (requirements_satisfied? {:type :book :alias "alias" :attributes {:author "Einstein"}})
-
-
-
-
+  (bib_object_to_string (bib_gen_template type alias (:required ((keyword type) bibtex_types)))))
 
 
 ;;;; BIB TEX PARSING
 
 ;; helpers
-(defn- bib_check_head [line]
+(defn- bib_check_head
   "Helper function for bib_parser. Will return a map on success or nil on failure."
+  [line]
 
   ;; Match for entrytype and citekey (head)
   ;; Spaces between are currently not allowed 
@@ -121,8 +101,10 @@
     nil))
 
 ;; Notice: r-value has to be written as string with double quotes!!!
-(defn- bib_get_body_line [line]
+(defn- bib_get_body_line
   "Helper function for bib_parser. Will return a map on success or nil on failure."
+  [line]
+
   ;; parse attribute and value from body
   ;; check syntax: ATTRIBUTE = VALUE
   (if (re-matches #"^\s*\t*[a-zA-Z]+\s*\t*=\s*\t*\".*\",*$" line)
@@ -140,8 +122,10 @@
     nil))
 
 ;; Actual parser
-(defn parse_bib_object [coll read_line]
+(defn parse_bib_object
   "This function needs following datastructur as coll: {:current_state 0 :current_line 0 :payload {}} It returns a bib tex object as map in :payload and a :current_line counter to store reading position of the file. Use this function in combination with reduce as follows: (reduce parse_bib_object {:current_state 0 :current_line 0 :payload {}} read_file_as_coll)"
+  [coll read_line]
+
   ;; Check: coll is a map?
   (case (:current_state coll)
     0 (do
@@ -184,7 +168,6 @@
 
 (defn parse_bib_file [path]
   (parse_bib_str (fs/read-all-lines path)))
-
 
 (defn bibtex_valid?
   "Verify a string for being in bibtex formate"

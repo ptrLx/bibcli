@@ -97,8 +97,8 @@
   (str (fs/copy path (str (root_folder) "/res/" alias))))
 
 (defn create_file_central
-  [alias filename content]
-  (str (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) [content])))
+  [alias filename lines]
+  (str (fs/write-lines (fs/file (str (root_folder) "/res/" alias "/" filename)) lines)))
 
 (defn list_aliases
   "Return a list with names of all available aliases"

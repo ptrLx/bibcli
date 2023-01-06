@@ -39,19 +39,18 @@
          (if (bibtex/bibtex_valid? bibtex)
            (let [bibtex_data (bibtex/parse_bib_file bibtex)]
              (if (= (count bibtex_data) 0)
-               (throw (Exception. "ERROR: Bibtexfile invalid."))
-               ())
-             (if (> (count bibtex_data) 1)
-               (println "WARN: Ignoring multiple bibtex entries in provided bibtex file.")
-               ())
-             (let [bibtex_data_first (bibtex_data 0) alias (bibtex/alias bibtex_data_first)]
-               (system/create_central alias)
-               (if move
-                 (do (system/move_to_central alias path)
-                     (println (system/move_to_central alias bibtex)))
-                 (do (system/copy_to_central alias path)
-                     (println (system/copy_to_central alias bibtex))))
-               (_add_central commit push alias)))
+               (println "ERROR: Bibtexfile invalid.")
+               (do (if (> (count bibtex_data) 1)
+                     (println "WARN: Ignoring multiple bibtex entries in provided bibtex file.")
+                     ())
+                   (let [bibtex_data_first (bibtex_data 0) alias (bibtex/alias bibtex_data_first)]
+                     (system/create_central alias)
+                     (if move
+                       (do (system/move_to_central alias path)
+                           (println (system/move_to_central alias bibtex)))
+                       (do (system/copy_to_central alias path)
+                           (println (system/copy_to_central alias bibtex))))
+                     (_add_central commit push alias)))))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
      ;; alias provided
@@ -60,7 +59,7 @@
            (if move
              (system/move_to_central alias path)
              (system/copy_to_central alias path))
-           (println  (system/create_file_central alias "bib" (bibtex/print_format (if (not (nil? type)) type :misc))))
+           (println (system/create_file_central alias "bib" (bibtex/print_format alias (if (not (nil? type)) type "misc"))))
            (_add_central commit push alias))
        (println "ERROR: Bibtex file or alias is required."))))
 
