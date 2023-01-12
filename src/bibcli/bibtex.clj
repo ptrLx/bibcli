@@ -59,7 +59,7 @@
            (conj [] (format "@%s{%s," (name (bib_object "entrytype")) (bib_object "citekey")))
            (conj
             (vec
-             (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
+             (doall (map #(format "%-2s %-10s = \"%s\"," "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
 
 (defn- bib_gen_template
   "Enter entrytype, citekey as string and a set of keys."

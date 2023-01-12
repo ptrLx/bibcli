@@ -34,7 +34,7 @@
    (if (not (nil? bibtex))
     ;;  bibtex file provided
      (do (if (not (nil? alias))
-           (println "WARNING: Ignoring alias as it is provided in bibtex file.")
+           (println "WARN: Ignoring alias as it is provided in bibtex file.")
            ())
          (if (bibtex/bibtex_valid? bibtex)
            (let [bibtex_data (bibtex/parse_bib_file bibtex)]
@@ -44,13 +44,15 @@
                      (println "WARN: Ignoring multiple bibtex entries in provided bibtex file.")
                      ())
                    (let [bibtex_data_first (bibtex_data 0) alias (bibtex/alias bibtex_data_first)]
-                     (system/create_central alias)
-                     (if move
-                       (do (system/move_to_central alias path)
-                           (println (system/move_to_central alias bibtex)))
-                       (do (system/copy_to_central alias path)
-                           (println (system/copy_to_central alias bibtex))))
-                     (_add_central commit push alias)))))
+                     (if (system/res_exists? alias)
+                       (println (str "ERROR: Ressource \"" alias "\" already exists in central repository."))
+                       (do (system/create_central alias)
+                           (if move
+                             (do (system/move_to_central alias path)
+                                 (println (system/move_to_central alias bibtex)))
+                             (do (system/copy_to_central alias path)
+                                 (println (system/copy_to_central alias bibtex))))
+                           (_add_central commit push alias)))))))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
      ;; alias provided
@@ -64,13 +66,13 @@
        (println "ERROR: Bibtex file or alias is required."))))
 
   ([commit push alias]
-   (if (or commit (system/val_from_key_config :commit))
+   (if (or commit (system/val_from_key_config "autocommit"))
      (if (system/git_central_is_repo?)
        (do (system/git_commit_add_res alias)
-           (if (or push (system/val_from_key_config :commit))
+           (if (or push (system/val_from_key_config "autopush"))
              (system/git_push_central)
              ()))
-       (if commit
+       (if (or commit push)
          (println "WARN: No git repository found in central.")
          ()))
      ())))
@@ -110,11 +112,13 @@
 
 (defn add_local
   [{:keys [alias] :as _args}]
-  (if (system/bib-ref_exists?)
-    (system/add_aliases_bib-ref (filter_existence alias))
-    (do
-      (println "WARN: No bib-ref file exists. Creating one...")
-      (system/create_bib-ref alias))))
+  (if (not (nil? alias))
+    (if (system/bib-ref_exists?)
+      (system/add_aliases_bib-ref (filter_existence alias))
+      (do
+        (println "WARN: No bib-ref file exists. Creating one...")
+        (system/create_bib-ref alias)))
+    ()))
 
 (defn remove_local
   [{:keys [alias] :as _args}]
