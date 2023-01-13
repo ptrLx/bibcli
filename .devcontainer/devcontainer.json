@@ -20,7 +20,9 @@
 		"vscjava.vscode-java-pack",
 		"borkdude.clj-kondo",
 		"betterthantomorrow.calva",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"streetsidesoftware.code-spell-checker",
+		"streetsidesoftware.code-spell-checker-german"
 	]
     }
   },

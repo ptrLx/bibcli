@@ -158,10 +158,10 @@
   [bib_object]
   (let [body_data (dissoc bib_object "entrytype" "citekey")]
     (apply conj
-           (conj [] (format "@%s{%s," (bib_object "entrytype") (bib_object "citekey")))
+           (conj [] (format "@%s{%s," (name (bib_object "entrytype")) (bib_object "citekey")))
            (conj
             (vec
-             (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
+             (doall (map #(format "%-2s %-10s = \"%s\"," "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
 
 (defn bib_file
   "Converting a bib tex map datastructure to a list of string for writing back to file"

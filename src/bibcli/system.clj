@@ -128,6 +128,14 @@
   [key]
   ((read_config) key))
 
+(defn editor_config
+  "Get pefered editor from config or use nano if nothing is set"
+  []
+  (let [editor (val_from_key_config "editor")]
+    (if (not (nil? editor))
+      editor
+      "nano")))
+
 (defn- write-config
   "Write with arg as map to config"
   [arg]

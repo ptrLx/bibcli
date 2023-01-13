@@ -1,7 +1,8 @@
 (ns bibcli.commands
   (:require [bibcli.system :as system]
             [bibcli.bibtex :as bibtex]
-            [bibcli.bibtex_search :as bibsearch]))
+            [bibcli.bibtex_search :as bibsearch]
+            [babashka.process :refer [shell]]))
 
 (defn- filter_existence
   [aliases]
@@ -11,14 +12,16 @@
                  false))
           (set aliases)))
 
-
 (defn config
-  [{:keys [autocommit autopush] :as _args}]
+  [{:keys [autocommit autopush editor] :as _args}]
   (if (boolean? autocommit)
     (system/add_data_config :autocommit autocommit)
     ())
   (if (boolean? autopush)
     (system/add_data_config :autopush autopush)
+    ())
+  (if (string? editor)
+    (system/add_data_config :editor editor)
     ()))
 
 (defn init_central
@@ -30,8 +33,17 @@
           (system/git_init_central)
           ()))))
 
+(defn- open_editor
+  [path edit]
+  (if (and (not (nil? edit)) edit)
+
+    (shell (str (system/editor_config) " " path))
+    (println "Success."))
+  ;; (println "File saved.")
+  )
+
 (defn- _add_central
-  ([path bibtex alias type commit push move]
+  ([path bibtex alias type commit push move edit]
    (if (not (nil? bibtex))
     ;;  bibtex file provided
      (do (if (not (nil? alias))
@@ -50,9 +62,9 @@
                        (do (system/create_central alias)
                            (if move
                              (do (system/move_to_central alias path)
-                                 (println (system/move_to_central alias bibtex)))
+                                 (open_editor (system/move_to_central alias bibtex) edit))
                              (do (system/copy_to_central alias path)
-                                 (println (system/copy_to_central alias bibtex))))
+                                 (open_editor (system/copy_to_central alias bibtex) edit)))
                            (_add_central commit push alias)))))))
            (println "ERROR: Invalid bibtex file.")))
     ;; no bibtex file provided
@@ -62,7 +74,7 @@
            (if move
              (system/move_to_central alias path)
              (system/copy_to_central alias path))
-           (println (system/create_file_central alias "bib" (bibtex/print_format alias (if (not (nil? type)) type "misc"))))
+           (open_editor (system/create_file_central alias "bib" (bibtex/print_format alias (if (not (nil? type)) type "misc"))) edit)
            (_add_central commit push alias))
        (println "ERROR: Bibtex file or alias is required."))))
 
@@ -79,12 +91,12 @@
      ())))
 
 (defn add_central
-  [{:keys [path bibtex alias type commit push] :as _args}]
-  (_add_central path bibtex alias type commit push false))
+  [{:keys [path bibtex alias type commit push edit] :as _args}]
+  (_add_central path bibtex alias type commit push false edit))
 
 (defn move_central
-  [{:keys [path bibtex alias type commit push] :as _args}]
-  (_add_central path bibtex alias type commit push true))
+  [{:keys [path bibtex alias type commit push edit] :as _args}]
+  (_add_central path bibtex alias type commit push true edit))
 
 (defn remove_central
   [{:keys [alias] :as _args}]

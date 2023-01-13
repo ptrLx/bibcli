@@ -36,6 +36,11 @@
     :short "p"
     :as "push to git"
     :type :with-flag
+    :default false}
+   {:option "edit"
+    :short "e"
+    :as "edit bibtex file in repository"
+    :type :with-flag
     :default false}])
 
 (def CONFIGURATION
@@ -55,6 +60,10 @@
                                 {:option "autopush"
                                  :as "automated pushes to git"
                                  :type :with-flag
+                                 :default nil}
+                                {:option "editor"
+                                 :as "set preferred editor"
+                                 :type :string
                                  :default nil}]
                   :runs cmd/config}
                  {:command     "initc"
@@ -106,11 +115,11 @@
                                 "bibcli searchc --key \"title\""
                                 "bibcli searchc --value \"analysis\" --key \"title\""]
                   :opts        [{:option "value"
-                                 :as "search for a keyword in type-valuy value of any bibtex file in central repository."
+                                 :as "search for a keyword in type-value value of any bibtex file in central repository."
                                  :type :string
                                  :default nil}
                                 {:option "key"
-                                 :as "find all ressources that contain this attribute-key."
+                                 :as "find all resources that contain this attribute-key."
                                  :type :string
                                  :default nil}]
                   :runs cmd/search_central}
