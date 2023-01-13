@@ -5,5 +5,4 @@
                                  :sha "1a841c4cc1d4f6dab7505a98ed2d532dd9d56b78"}
         cli-matic/cli-matic {:mvn/version "0.5.4"}
         org.clojure/data.json {:mvn/version "2.4.0"}
-        ;;// org.flatland/ordered {:mvn/version "1.15.10"}
-        }}
+        org.flatland/ordered {:mvn/version "1.15.10"}}}

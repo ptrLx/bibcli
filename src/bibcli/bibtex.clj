@@ -82,29 +82,27 @@
 ;;;; BIB TEX PARSING
 
 ;; helpers
-(defn- bib_check_head 
+(defn- bib_check_head
   "Helper function for bib_parser. Will return a map on success or nil on failure."
   [line]
-  
+
   ;; Match for entrytype and citekey (head)
   ;; Spaces between are currently not allowed 
   (if (re-matches #"^@[a-zA-Z]+\{[a-zA-Z0-9_:-]+,$" line)
     (do
 
       (comment
-      { "entrytype"
-       (re-find #"(?<=@)[a-zA-Z]+" line)
-       "citekey"
-       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) })
+        {"entrytype"
+         (re-find #"(?<=@)[a-zA-Z]+" line)
+         "citekey"
+         (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
 
       (ordered-map "entrytype"
-       (re-find #"(?<=@)[a-zA-Z]+" line)
-       "citekey"
-       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) )
+                   (re-find #"(?<=@)[a-zA-Z]+" line)
+                   "citekey"
+                   (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line))) nil))
 
-      )nil))
-
-(defn- bib_get_body_line 
+(defn- bib_get_body_line
   "Helper function for bib_parser. Will return a map on success or nil on failure."
   [line]
   (if (re-matches #"^\s*\t*[a-zA-Z]+\s*\t*=\s*\t*(\".*\"|\{.*\}),*$" line)
@@ -112,10 +110,9 @@
       ;; Attributes should only consists of letters
       ;; Values can consist of all printable ascii letters
       (ordered-map
-       { (clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
+       {(clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
        ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
-       (clojure.string/replace (re-find #"\".*\"|\{.*\}" line) #"\"|\{|\}" "")
-        }))nil))
+        (clojure.string/replace (re-find #"\".*\"|\{.*\}" line) #"\"|\{|\}" "")})) nil))
 
 ;; Actual parser
 (defn parse_bib_object
@@ -123,54 +120,60 @@
   [coll read_line]
 
   ;; Check: coll is a map?
-      (case (:current_state coll)
-      0 (do
-          (let [check_head_res (bib_check_head read_line)]
-           (if check_head_res
+  (case (:current_state coll)
+    0 (do
+        (let [check_head_res (bib_check_head read_line)]
+          (if check_head_res
             ;; Return new maps
-             (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_head_res)))
+            (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_head_res)))
              ;; BUG TO FIX HERE!
              ;; This exception will NOT be thrown in current implementation
              ;; They will just skip the object with pars-head-error!
-             (throw (Exception. (str "bibtex::Parser-Error: Failure in head! Look at line -> " (inc (:current_line coll)) "| " read_line))))))
-      1 (do
-          (let [check_body_res (bib_get_body_line read_line)]
-            (if check_body_res
+            (throw (Exception. (str "bibtex::Parser-Error: Failure in head! Look at line -> " (inc (:current_line coll)) "| " read_line))))))
+    1 (do
+        (let [check_body_res (bib_get_body_line read_line)]
+          (if check_body_res
             ;; Return new map
-              (do (assoc coll :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_body_res)))
-              (if (= "}" read_line)
+            (do (assoc coll :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_body_res)))
+            (if (= "}" read_line)
                 ;;end of object reading
-                (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll))))
+              (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll))))
 
-                (throw (Exception. (str "bibtex::Parser-Error: Failure in body of @" (get (:payload coll) "entrytype") "{" (get (:payload coll) "citekey")  " Look at line -> " (inc (:current_line coll)) "| " read_line)))))))
+              (throw (Exception. (str "bibtex::Parser-Error: Failure in body of @" (get (:payload coll) "entrytype") "{" (get (:payload coll) "citekey")  " Look at line -> " (inc (:current_line coll)) "| " read_line)))))))
       ;;2 (do (println "Finished object parsing.") coll)
-      2 (do coll)
+    2 (do coll)
       ;; else
-      "Error: Wrong state!"
-    ))
+    "Error: Wrong state!"))
 
-(defn parse_bib_file 
+(defn parse_bib_file
   "Parse a bib tex file from given path an return a data structure with both meta and payload data"
   [path]
   (let [read_file (babashka.fs/read-all-lines path)
-        match_indeces (keep-indexed #(when %2 %1) (map bibcli.system/bib_check_head read_file))
-        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces) 
-        ]
+        match_indeces (keep-indexed #(when %2 %1) (map bib_check_head read_file))
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces)]
     res_object_list))
 
-(defn bib_object_to_string 
+(defn bib_object_to_string
   "Converting a map which represents a valid bib text to a list of formated strings"
   [bib_object]
   (let [body_data (dissoc bib_object "entrytype" "citekey")]
     (apply conj
-      (conj [] (format "@%s{%s," (bib_object "entrytype") (bib_object "citekey")))
-      (conj
-       (vec
-        (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))
-        ) "}" ""))))
+           (conj [] (format "@%s{%s," (bib_object "entrytype") (bib_object "citekey")))
+           (conj
+            (vec
+             (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
 
 (defn bib_file
   "Converting a bib tex map datastructure to a list of string for writing back to file"
   [coll]
-  (reduce #(apply conj %1 (bibcli.system/bib_object_to_string %2)) [] (reduce #(conj %1 (:payload %2)) [] coll))  
-  )
+  (reduce #(apply conj %1 (bib_object_to_string %2)) [] (reduce #(conj %1 (:payload %2)) [] coll)))
+
+(defn bibtex_valid?
+  "Verify a string for being in bibtex formate"
+  [bibtex]
+  ;; todo
+  true)
+
+(e/def ::BIBTEX-VALID
+  #(bibtex_valid? %)
+  "Invalid bibtex fiel")

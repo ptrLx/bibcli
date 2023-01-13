@@ -1,6 +1,7 @@
 (ns bibcli.commands
   (:require [bibcli.system :as system]
-            [bibcli.bibtex :as bibtex]))
+            [bibcli.bibtex :as bibtex]
+            [bibcli.bibtex_search :as bibsearch]))
 
 (defn- filter_existence
   [aliases]
@@ -101,6 +102,12 @@
     (doseq [alias (system/list_aliases)]
       (println alias))
     (println "WARN: No central repository found.")))
+
+(defn search_central
+  [{:keys [key value] :as _args}]
+  (if (and (nil? key) (nil? value))
+    (println "ERROR: No key or value was provided.")
+    (println (bibsearch/bib_search (str (system/root_folder) "/res/") :key key :value value))))
 
 (defn init_local
   [{:keys [alias] :as _args}]

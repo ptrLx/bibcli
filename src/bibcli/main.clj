@@ -100,6 +100,20 @@
                 ;;//                  :type (set (keys bibtex/bibtex_types))
                 ;;//                  :default nil}]
                   :runs cmd/list_central}
+                 {:command     "searchc"
+                  :description "search for a keyword in a specific attribute-type."
+                  :examples    ["bibcli searchc --value \"analysis\""
+                                "bibcli searchc --key \"title\""
+                                "bibcli searchc --value \"analysis\" --key \"title\""]
+                  :opts        [{:option "value"
+                                 :as "search for a keyword in type-valuy value of any bibtex file in central repository."
+                                 :type :string
+                                 :default nil}
+                                {:option "key"
+                                 :as "find all ressources that contain this attribute-key."
+                                 :type :string
+                                 :default nil}]
+                  :runs cmd/search_central}
                  {:command     "init"
                   :description "initialize a path as project. This will create a bib-ref file"
                   :examples    ["bibcli init -a <alias 1> -a <alias 2>"]
