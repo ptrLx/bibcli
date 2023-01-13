@@ -1,7 +1,10 @@
 (ns bibcli.bibtex
-  (:require [expound.alpha :as expound]
-            ;;// [flatland.ordered.map]
-            [babashka.fs :as fs]))
+  (:require [expound.alpha :as e]
+            [babashka.fs :as fs]
+            [clojure.data.json :as json]
+            [flatland.ordered.map]))
+
+(use 'flatland.ordered.map)
 
 
 (def fields #{:address :annote :author :booktitle :Email :chapter :crossref :doi :edition :editor
@@ -79,47 +82,40 @@
 ;;;; BIB TEX PARSING
 
 ;; helpers
-(defn- bib_check_head
+(defn- bib_check_head 
   "Helper function for bib_parser. Will return a map on success or nil on failure."
   [line]
-
+  
   ;; Match for entrytype and citekey (head)
   ;; Spaces between are currently not allowed 
   (if (re-matches #"^@[a-zA-Z]+\{[a-zA-Z0-9_:-]+,$" line)
     (do
 
       (comment
-        {"entrytype"
-         (re-find #"(?<=@)[a-zA-Z]+" line)
-         "citekey"
-         (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
-
-      {"entrytype"
+      { "entrytype"
        (re-find #"(?<=@)[a-zA-Z]+" line)
        "citekey"
-       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
-    nil))
+       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) })
 
-;; Notice: r-value has to be written as string with double quotes!!!
-(defn- bib_get_body_line
+      (ordered-map "entrytype"
+       (re-find #"(?<=@)[a-zA-Z]+" line)
+       "citekey"
+       (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line) )
+
+      )nil))
+
+(defn- bib_get_body_line 
   "Helper function for bib_parser. Will return a map on success or nil on failure."
   [line]
-
-  ;; parse attribute and value from body
-  ;; check syntax: ATTRIBUTE = VALUE
-  (if (re-matches #"^\s*\t*[a-zA-Z]+\s*\t*=\s*\t*\".*\",*$" line)
+  (if (re-matches #"^\s*\t*[a-zA-Z]+\s*\t*=\s*\t*(\".*\"|\{.*\}),*$" line)
     (do
       ;; Attributes should only consists of letters
       ;; Values can consist of all printable ascii letters
-      (comment
-        {(clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
+      (ordered-map
+       { (clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
        ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
-         (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")})
-
-      {(clojure.string/trim (re-find #"\s*\t*[a-zA-Z]+" line))
-       ;(clojure.string/trim (re-find #"(?<=\=)[\x20-\x7E]+" line))
-       (clojure.string/replace (re-find #"\".*\"" line) #"\"" "")})
-    nil))
+       (clojure.string/replace (re-find #"\".*\"|\{.*\}" line) #"\"|\{|\}" "")
+        }))nil))
 
 ;; Actual parser
 (defn parse_bib_object
@@ -127,54 +123,54 @@
   [coll read_line]
 
   ;; Check: coll is a map?
-  (case (:current_state coll)
-    0 (do
-        (let [check_head_res (bib_check_head read_line)]
-          (if check_head_res
+      (case (:current_state coll)
+      0 (do
+          (let [check_head_res (bib_check_head read_line)]
+           (if check_head_res
             ;; Return new maps
-            (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_head_res)))
-            (do (println "Warning: Missmatch of head! Error in line" (inc (:current_line coll)))))))
-    1 (do
-        (let [check_body_res (bib_get_body_line read_line)]
-          (if check_body_res
+             (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_head_res)))
+             ;; BUG TO FIX HERE!
+             ;; This exception will NOT be thrown in current implementation
+             ;; They will just skip the object with pars-head-error!
+             (throw (Exception. (str "bibtex::Parser-Error: Failure in head! Look at line -> " (inc (:current_line coll)) "| " read_line))))))
+      1 (do
+          (let [check_body_res (bib_get_body_line read_line)]
+            (if check_body_res
             ;; Return new map
-            (do (assoc coll :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_body_res)))
-            (if (= "}" read_line)
+              (do (assoc coll :current_line (inc (:current_line coll)) :payload (merge (:payload coll) check_body_res)))
+              (if (= "}" read_line)
                 ;;end of object reading
-              (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll))))
+                (do (assoc coll :current_state (inc (:current_state coll)) :current_line (inc (:current_line coll))))
 
-              (do (println "Warning: Missmatch of body! Error in line" (inc (:current_line coll))))))))
+                (throw (Exception. (str "bibtex::Parser-Error: Failure in body of @" (get (:payload coll) "entrytype") "{" (get (:payload coll) "citekey")  " Look at line -> " (inc (:current_line coll)) "| " read_line)))))))
       ;;2 (do (println "Finished object parsing.") coll)
-    2 (do coll)
+      2 (do coll)
       ;; else
-    "Error: Wrong state!"))
+      "Error: Wrong state!"
+    ))
 
-;; "/Users/blacksurface/Desktop/WiSe22_23/MFPM/bibcli/"
-;; "test2.bib"
-;; To-Do: Reihenfolge beim Output beachten !
-;; Fix: Lazy-Seq in normale Seq überführen, dann
-;; werden Elemente in Reihenfolge mit conj angehängt
-;; Ab einer bestimmten Länge der bibtext objecte fängt es an (mehr als 6 Einträge)
-;; hash-map's Reihenfolge kann sich ändern, wenn diese manipuliert wird, z.B. mit assoc
-;; Alternative Datenstrukturen eher schlecht
-;; -> Map gleich komplett erstellen und auf assoc/dissoc verzichten?
-;; Extra Implementierung für orderd-maps
-
-(defn parse_bib_str
-  [bib_lines]
-  (let [match_indeces (keep-indexed #(when %2 %1) (map bib_check_head bib_lines))
-        res_object_list (reduce #(conj %1 (reduce parse_bib_object {:current_state 0 :current_line %2 :payload {}} (drop %2 bib_lines))) [] match_indeces)]
+(defn parse_bib_file 
+  "Parse a bib tex file from given path an return a data structure with both meta and payload data"
+  [path]
+  (let [read_file (babashka.fs/read-all-lines path)
+        match_indeces (keep-indexed #(when %2 %1) (map bibcli.system/bib_check_head read_file))
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces) 
+        ]
     res_object_list))
 
-(defn parse_bib_file [path]
-  (parse_bib_str (fs/read-all-lines path)))
+(defn bib_object_to_string 
+  "Converting a map which represents a valid bib text to a list of formated strings"
+  [bib_object]
+  (let [body_data (dissoc bib_object "entrytype" "citekey")]
+    (apply conj
+      (conj [] (format "@%s{%s," (bib_object "entrytype") (bib_object "citekey")))
+      (conj
+       (vec
+        (doall (map #(format "%-2s %-10s = \"%s\"" "" %1 %2) (keys body_data) (vals body_data)))
+        ) "}" ""))))
 
-(defn bibtex_valid?
-  "Verify a string for being in bibtex formate"
-  [bibtex]
-  ;; todo
-  true)
-
-(expound/def ::BIBTEX-VALID
-  #(bibtex_valid? %)
-  "Invalid bibtex fiel")
+(defn bib_file
+  "Converting a bib tex map datastructure to a list of string for writing back to file"
+  [coll]
+  (reduce #(apply conj %1 (bibcli.system/bib_object_to_string %2)) [] (reduce #(conj %1 (:payload %2)) [] coll))  
+  )
