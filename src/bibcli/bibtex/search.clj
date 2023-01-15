@@ -1,9 +1,9 @@
-(ns bibcli.bibtex_search
-  (:require
-   [babashka.fs :as fs]
-   [bibcli.bibtex :as bibtex]
+(ns bibcli.bibtex.search
+  (:require [bibcli.bibtex.common :as common]
+            [babashka.fs :as fs]
+            [bibcli.bibtex.bibtex :as bibtex]
   ;;  [flatland.ordered.map]
-   ))
+            ))
 
 ;; (use 'flatland.ordered.map)
 ;;;; SEARCH ENGINE
@@ -14,22 +14,6 @@
 ;; Helper: own predicate for logical true (e.g. nil, false return false)
 (defn logical_true? [x]
   (if x true false))
-
-;; Helper: own predicate function
-(defn coll-but-not-map?
-  [coll]
-  (and (coll? coll)
-       (not (map? coll))))
-
-;; Good choice for an macro
-;; Recur JVM optimisation with tail recursion
-(defn help_do_flat_coll
-  "This function will unpack a nested collection of list or vector to a flat collection."
-  [coll]
-  ((fn unpack_coll [coll]
-     (if (some true? (map coll-but-not-map? coll))
-       (recur (reduce #(if (coll? %2) (apply conj %1 %2) (conj %1 %2)) [] coll))
-       coll)) coll))
 
 (defn bib_grep_files
   "Enter the ressource path of aliases. Will return a collection or a nested collection of all files with .bib extension."
@@ -85,7 +69,7 @@
 ;; helper: Return a collection of bib objects. Grep all bib files from aliases located in corresponding ressource path
 (defn bib_res_object_coll [path]
   (let [bib_files (bib_grep_files path)
-        bib_objects (help_do_flat_coll (map bibtex/parse_bib_file bib_files))]
+        bib_objects (common/help_do_flat_coll (map bibtex/parse_bib_file bib_files))]
     bib_objects))
 
 ;; Main function: search for VALUE
@@ -134,8 +118,8 @@
   (letfn [(create_pprint_item [coll]
             (let [prefix ["- - -" "Path:" (nth coll 0) ""]
                   bib_obj (apply hash-map (drop 1 coll))
-                  str_bib_obj (bibcli.bibtex/bib_object_to_string bib_obj)]
-              (help_do_flat_coll (apply conj [prefix str_bib_obj]))))]
+                  str_bib_obj (common/bib_object_to_string bib_obj)]
+              (common/help_do_flat_coll (apply conj [prefix str_bib_obj]))))]
     (map create_pprint_item coll)))
 
 (defn bib_search_as_pprint
@@ -143,7 +127,7 @@
   [path & {:keys [key value print-now]}]
   (let [res_search_coll (bib_search path :key key :value value)
         pprint_coll (bib_create_pprint_coll res_search_coll)
-        pprint_flat_coll (help_do_flat_coll pprint_coll)]
+        pprint_flat_coll (common/help_do_flat_coll pprint_coll)]
     ;; run! has the same functionality like:
     ;; (reduce #(println %2) "" ["Hello" "my" "friends"])
     (if print-now (run! println pprint_flat_coll)

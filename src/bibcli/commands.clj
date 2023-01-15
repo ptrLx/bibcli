@@ -1,7 +1,7 @@
 (ns bibcli.commands
   (:require [bibcli.system :as system]
-            [bibcli.bibtex :as bibtex]
-            [bibcli.bibtex_search :as bibsearch]
+            [bibcli.bibtex.bibtex :as bibtex]
+            [bibcli.bibtex.search :as search]
             [babashka.process :refer [shell]]))
 
 (defn- filter_existence
@@ -119,7 +119,7 @@
   [{:keys [key value] :as _args}]
   (if (and (nil? key) (nil? value))
     (println "ERROR: No key or value was provided.")
-    (run! println (bibsearch/bib_search_as_pprint (str (system/root_folder) "/res/") :key key :value value))))
+    (run! println (search/bib_search_as_pprint (str (system/root_folder) "/res/") :key key :value value))))
 
 (defn init_local
   [{:keys [alias] :as _args}]

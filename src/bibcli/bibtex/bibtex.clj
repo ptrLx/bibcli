@@ -1,7 +1,7 @@
-(ns bibcli.bibtex
-  (:require [expound.alpha :as e]
+(ns bibcli.bibtex.bibtex
+  (:require [bibcli.bibtex.common :as common]
+            [expound.alpha :as e]
             [babashka.fs :as fs]
-            [clojure.data.json :as json]
             [flatland.ordered.map]))
 
 (use 'flatland.ordered.map)
@@ -153,27 +153,10 @@
         res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces)]
     res_object_list))
 
-(defn bib_object_to_string
-  "Converting a map which represents a valid bib text to a list of formated strings"
-  [bib_obj]
-  (letfn [(body_line [key value]
-            (format "%-2s %-10s = \"%s\"," "" key value))
-          (rm_last_char [s]
-            (subs s 0 (- (count s) 1)))
-          ]
-    (let [
-          body_data (dissoc bib_obj "entrytype" "citekey")
-          head (format "@%s{%s," (name (bib_obj "entrytype")) (bib_obj "citekey")) 
-          body (map #(body_line %1 %2) (keys body_data) (vals body_data))
-          tail ["}" ""]
-          ]
-      (bibtex_search/help_do_flat_coll [head (drop-last body) (rm_last_char (last body)) tail])
-    )))
-
 (defn bib_file
   "Converting a bib tex map datastructure to a list of string for writing back to file"
   [coll]
-  (reduce #(apply conj %1 (bib_object_to_string %2)) [] (reduce #(conj %1 (:payload %2)) [] coll)))
+  (reduce #(apply conj %1 (common/bib_object_to_string %2)) [] (reduce #(conj %1 (:payload %2)) [] coll)))
 
 (defn bibtex_valid?
   "Verify a string for being in bibtex formate"
