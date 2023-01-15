@@ -76,7 +76,7 @@
 (defn print_format
   "Generate a bibtex template according to a type"
   [alias type]
-  (bib_object_to_string (bib_gen_template type alias (:required ((keyword type) bibtex_types)))))
+  (common/bib_object_to_string (bib_gen_template type alias (:required ((keyword type) bibtex_types)))))
 
 
 ;;;; BIB TEX PARSING
