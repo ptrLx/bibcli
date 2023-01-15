@@ -109,7 +109,10 @@
 (defn get_bib
   "Get content of bib file corresponding to an alias"
   [alias]
-  (fs/read-all-lines (fs/file (str (root_folder) "/res/" alias "/bib"))))
+  (let [filename (str (root_folder) "/res/" alias "/bib")]
+    (if (fs/exists? filename)
+      (fs/read-all-lines (fs/file filename))
+      ())))
 
 ;;;; Handle config content
 
