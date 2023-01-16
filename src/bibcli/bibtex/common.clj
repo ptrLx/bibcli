@@ -20,7 +20,7 @@
   "Converting a map which represents a valid bib text to a list of formated strings"
   [bib_obj]
   (letfn [(body_line [key value]
-            (format "%-2s %-10s = \"%s\"," "" key value))
+            (format "%-2s %-10s = {%s}," "" key value))
           (rm_last_char [s]
             (subs s 0 (- (count s) 1)))]
     (let [body_data (dissoc bib_obj "entrytype" "citekey")
