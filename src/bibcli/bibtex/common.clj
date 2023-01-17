@@ -1,4 +1,4 @@
-(ns bibcli.bxibtex.common)
+(ns bibcli.bibtex.common)
 
 ;; Helper: own predicate function
 (defn coll-but-not-map?
@@ -19,9 +19,9 @@
   "Converting a map which represents a valid bib text to a list of formated strings"
   [bib_obj]
   (letfn [(body_line [key value]
-              (format "%-2s %-10s = {%s}," "" key value))
+            (format "%-2s %-10s = {%s}," "" key value))
           (rm_last_char [s]
-              (subs s 0 (- (count s) 1)))]
+            (subs s 0 (- (count s) 1)))]
     (let [body_data (dissoc bib_obj "entrytype" "citekey")
           head (format "@%s{%s," (name (bib_obj "entrytype")) (bib_obj "citekey"))
           body (if (not (empty? body_data))
@@ -29,5 +29,4 @@
           tail ["}" ""]]
       (if (nil? body)
         (help_do_flat_coll [head tail])
-        (help_do_flat_coll [head (drop-last body) (rm_last_char (last body)) tail])
-        ))))
+        (help_do_flat_coll [head (drop-last body) (rm_last_char (last body)) tail])))))
