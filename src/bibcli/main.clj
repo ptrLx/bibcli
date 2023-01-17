@@ -100,14 +100,6 @@
                  {:command "listc"
                   :description "list resources"
                   :examples ["bibcli listc"]
-                ;;//   :opts        [{:option "author"
-                ;;//                  :as "list only resources of this author"
-                ;;//                  :type :string}
-                ;;//                 {:option "type"
-                ;;//                  :short "t"
-                ;;//                  :as "list only resources of this bibtex type"
-                ;;//                  :type (set (keys bibtex/bibtex_types))
-                ;;//                  :default nil}]
                   :runs cmd/list_central}
                  {:command     "searchc"
                   :description "search for a keyword in a specific attribute-type."
@@ -130,27 +122,16 @@
                                  :short "a"
                                  :as "alias of resource you want to have in this project"
                                  :type :string
-                                 :multiple true
-                                ;;//  :spec  ::system/ALIASES-EXISTS
-                                 }]
+                                 :multiple true}]
                   :runs cmd/init_local}
                  {:command "add"
                   :description "add resource to current project"
-                  :examples ["bibcli add -a <alias 1> -a <alias 2>"
-                        ;;//      "bibcli add --author einstein"
-                             ]
+                  :examples ["bibcli add -a <alias 1> -a <alias 2>"]
                   :opts [{:option "alias"
                           :short "a"
                           :as "add resource with this alias"
                           :type :string
-                          :multiple true
-                          ;;// :spec ::system/ALIASES-EXISTS
-                          }
-                        ;;//  {:option "author"
-                        ;;//   :as "add all resources from this authors"
-                        ;;//   :type :string
-                        ;;//   :multiple true}
-                         ]
+                          :multiple true}]
                   :runs cmd/add_local}
                  {:command "rm"
                   :description "delete resources from project"
@@ -179,9 +160,7 @@
                           :short "o"
                           :as "output path"
                           :type :string
-                          :default "bib"
-                        ;;//   :spec ::system/BIB-REF-EXISTS
-                          }]
+                          :default "bib"}]
                   :runs cmd/generate}]})
 
 (defn -main [& _args]

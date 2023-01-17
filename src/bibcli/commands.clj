@@ -124,7 +124,9 @@
 (defn init_local
   [{:keys [alias] :as _args}]
   (if (not (system/bib-ref_exists?))
-    (system/create_bib-ref alias)
+    (if (not (nil? alias))
+      (system/create_bib-ref (filter_existence alias))
+      (system/create_bib-ref nil))
     (do
       (println "WARN: Bib-ref file already exists. Adding aliases...")
       (system/add_aliases_bib-ref (filter_existence alias)))))
@@ -137,7 +139,7 @@
       (do
         (println "WARN: No bib-ref file exists. Creating one...")
         (system/create_bib-ref alias)))
-    ()))
+    (println "ERROR: No aliases provided.")))
 
 (defn remove_local
   [{:keys [alias] :as _args}]

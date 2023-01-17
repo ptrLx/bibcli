@@ -172,7 +172,9 @@
 (defn create_bib-ref
   "Write aliases per line to ./bib-ref"
   [aliases]
-  (fs/write-lines (fs/file (local_bib-ref_path)) aliases))
+  (if (not (nil? aliases))
+    (fs/write-lines (fs/file (local_bib-ref_path)) aliases)
+    (fs/write-lines (fs/file (local_bib-ref_path)) [])))
 
 (defn remove_aliases_bib-ref
   "Remove aliases from bib-ref"
