@@ -6,7 +6,6 @@
   (and (coll? coll)
        (not (map? coll))))
 
-;; Good choice for an macro
 ;; Recur JVM optimisation with tail recursion
 (defn help_do_flat_coll
   "This function will unpack a nested collection of list or vector to a flat collection."
@@ -28,3 +27,17 @@
           body (map #(body_line %1 %2) (keys body_data) (vals body_data))
           tail ["}" ""]]
       (help_do_flat_coll [head (drop-last body) (rm_last_char (last body)) tail]))))
+
+;; OLD VERSION DELETE THIS
+(comment
+(defn- bib_object_to_string
+  "Converting a map which represents a valid bib text to a list of formated strings"
+  [bib_object]
+
+  (let [body_data (dissoc bib_object "entrytype" "citekey")]
+    (apply conj
+           (conj [] (format "@%s{%s," (name (bib_object "entrytype")) (bib_object "citekey")))
+           (conj
+            (vec
+             (doall (map #(format "%-2s %-10s = \"%s\"," "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
+)

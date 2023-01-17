@@ -1,33 +1,29 @@
 (ns bibcli.bibtex.search
   (:require [bibcli.bibtex.common :as common]
             [babashka.fs :as fs]
-            [bibcli.bibtex.bibtex :as bibtex]
-  ;;  [flatland.ordered.map]
-            ))
+            [bibcli.bibtex.bibtex :as bibtex]))
 
-;; (use 'flatland.ordered.map)
 ;;;; SEARCH ENGINE
-;; Find all .bib files starting from given path
 
-;;;; UTILS SECTION
-
-;; Helper: own predicate for logical true (e.g. nil, false return false)
-(defn logical_true? [x]
+(defn logical_true?
+  "Own predicate to check logical true."
+  [x]
   (if x true false))
 
 (defn bib_grep_files
-  "Enter the ressource path of aliases. Will return a collection or a nested collection of all files with .bib extension."
+  "Enter the ressource path of aliases. It returns a collection of paths which refer to bib files."
   [path]
-  (letfn [(filter_dirs [path] (filter babashka.fs/directory? (babashka.fs/list-dir (babashka.fs/expand-home path))))
-          (filter_files [path] (filter babashka.fs/regular-file? (babashka.fs/list-dir (babashka.fs/expand-home path))))
-          (match_bib_ext [arg] (re-find #"(?i)^.+/bib$|.+\.bib$" (str arg)))
-          (filter_nil [coll] (filter #(if %1 true false) coll))
-          (unpack_nest_coll [coll] (reduce #(if (coll? %2) (apply conj %1 %2) (conj %1 %2)) [] coll))]
-    (filter_nil (unpack_nest_coll (map #(map match_bib_ext (filter_files %1)) (filter_dirs path))))))
+  (letfn [(get_dirs [path]
+            (filter babashka.fs/directory? (babashka.fs/list-dir (babashka.fs/expand-home path))))
+          (get_files [path]
+            (filter babashka.fs/regular-file? (babashka.fs/list-dir (babashka.fs/expand-home path))))
+          (check_bib_tex [arg]
+            (re-find #"(?i)^.+/bib$|.+\.bib$" (str arg)))
+          (get_bib_files [path]
+            (filter logical_true? (map check_bib_tex (get_files path))))
+          ]
+    (common/help_do_flat_coll (map get_bib_files (get_dirs path)))))
 
-;;;; HELPER SECTION
-
-;; proto: helper: Extended version: controll case insensitive and 
 (defn bib_re_create_pattern
   "Create regex pattern by search string and further options like :case-insensitive true and/or :exact-match true"
   [search & {:keys [case-insensitive exact-match]}]
@@ -43,31 +39,29 @@
   (if (re-find (bib_re_create_pattern search :case-insensitive case-insensitive :exact-match exact-match) (str value))
     key nil))
 
-;; helper: Check string: Static default case-insensitive and not exact-matching. To get own controll of options, please use bib_pair_check_ext.
-(defn bib_pair_check [key value search]
+(defn bib_pair_check
+  "Return key by match in value. This function is just a simple wrapper for front-end compatibility. The search is in default case insensitive and not strict in matching."
+  [key value search]
   (if (re-find (bib_re_create_pattern search :case-insensitive true :exact-match false) (str value)) key nil))
 
-;; OLD VERSION! Clean this up.
-;; helper: Check string (case insensitive)
-(comment
-  (defn bib_pair_check [key value search]
-    (if (re-find (re-pattern (str "(?i)\\b" (str search) "\\b")) (str value)) key nil)))
-
-;; helper: Return all keys with matching values
-(defn bib_object_value [data value]
+(defn bib_object_value
+  "Return all keys of bib object by given value."
+  [data value]
   (filter logical_true?
           (map #(apply bib_pair_check (conj %1 value)) (:payload data))))
 
-;; helper: Build key coll a return object
-(defn bib_build_match_coll [data coll]
-  (let [object_payload (:payload data)]
-    (if (not (= 0 (count coll)))
+(defn bib_build_match_coll
+  "Return a bib_match_object. It contains at least of information like source-path, entrytype and citekey and additional keys, which are specified in provided coll."
+  [bib_obj coll]
+  (let [object_payload (:payload bib_obj)]
+    (if (not (empty? coll))
       (do
         (reduce #(conj %1 %2 (get object_payload %2))
-                [(:source data) "entrytype" (get object_payload "entrytype") "citekey" (get object_payload "citekey")] coll)))))
+                [(:source bib_obj) "entrytype" (get object_payload "entrytype") "citekey" (get object_payload "citekey")] coll)))))
 
-;; helper: Return a collection of bib objects. Grep all bib files from aliases located in corresponding ressource path
-(defn bib_res_object_coll [path]
+(defn bib_res_object_coll
+  "Enter ressource path of aliases. This function returns an collection of parsed bib files."
+  [path]
   (let [bib_files (bib_grep_files path)
         bib_objects (common/help_do_flat_coll (map bibtex/parse_bib_file bib_files))]
     bib_objects))
@@ -101,7 +95,6 @@
     (filter logical_true? (map #(search_bib_key_value %1 (name key) s) coll))))
 
 ;; Interface for search engine
-;; Example: (bibcli.system/bib_search path :key "year" :value "1994")
 (defn bib_search
   "With this function you can search all contents of the bib tex files for keywords, values or both. Pass the corresponding ressource path an at least the argument :key, :value or both."
   [path & {:keys [key value]}]
@@ -110,7 +103,6 @@
     (logical_true? key) (bib_search_res_key (bib_res_object_coll path) key)
     (logical_true? value) (bib_search_res_value (bib_res_object_coll path) value)
     :else (throw (Exception. "Argument-Error: You have to pass at least :key or :value!"))))
-
 
 (defn bib_create_pprint_coll
   "Input a collection of search result. This function will return a pretty print of strings as collection."
@@ -132,6 +124,3 @@
     ;; (reduce #(println %2) "" ["Hello" "my" "friends"])
     (if print-now (run! println pprint_flat_coll)
         pprint_flat_coll)))
-
-;; - - -test
-(def path "/Users/blacksurface/Desktop/bib_proj/res")

@@ -6,13 +6,9 @@
 
 (use 'flatland.ordered.map)
 
-
 (def fields #{:address :annote :author :booktitle :Email :chapter :crossref :doi :edition :editor
               :howpublished :institution :journal :key :month :note :number :organization :pages
               :publisher :school :series :title :type :volume :year})
-
-;;// (def types #{:article :book :booklet :conference :inbook :incollection :inproceedings
-;;//              :manual :mastersthesis :misc :phdthesis :proceedings :techreport :unpublished})
 
 (def bibtex_types {:article {:required #{:author :title :journal :year :volume}
                              :optional #{:number :pages :month :doi :note :key}}
@@ -53,18 +49,7 @@
   [parsed_bibtex]
   (get (:payload parsed_bibtex) "citekey"))
 
-(defn- bib_object_to_string
-  "Converting a map which represents a valid bib text to a list of formated strings"
-  [bib_object]
-
-  (let [body_data (dissoc bib_object "entrytype" "citekey")]
-    (apply conj
-           (conj [] (format "@%s{%s," (name (bib_object "entrytype")) (bib_object "citekey")))
-           (conj
-            (vec
-             (doall (map #(format "%-2s %-10s = \"%s\"," "" %1 %2) (keys body_data) (vals body_data)))) "}" ""))))
-
-(defn- bib_gen_template
+(defn bib_gen_template
   "Enter entrytype, citekey as string and a set of keys."
   [entrytype citekey coll]
 
@@ -78,25 +63,16 @@
   [alias type]
   (common/bib_object_to_string (bib_gen_template type alias (:required ((keyword type) bibtex_types)))))
 
-
 ;;;; BIB TEX PARSING
 
 ;; helpers
 (defn- bib_check_head
   "Helper function for bib_parser. Will return a map on success or nil on failure."
   [line]
-
   ;; Match for entrytype and citekey (head)
   ;; Spaces between are currently not allowed 
   (if (re-matches #"^@[a-zA-Z]+\{[a-zA-Z0-9_:-]+,$" line)
     (do
-
-      (comment
-        {"entrytype"
-         (re-find #"(?<=@)[a-zA-Z]+" line)
-         "citekey"
-         (re-find #"(?<=\{)[a-zA-Z0-9_:-]+" line)})
-
       (ordered-map "entrytype"
                    (re-find #"(?<=@)[a-zA-Z]+" line)
                    "citekey"
@@ -145,12 +121,13 @@
       ;; else
     "Error: Wrong state!"))
 
+;; Need REFACTORING! Use letfn!
 (defn parse_bib_file
   "Parse a bib tex file from given path an return a data structure with both meta and payload data"
   [path]
   (let [read_file (babashka.fs/read-all-lines path)
-        match_indeces (keep-indexed #(when %2 %1) (map bib_check_head read_file))
-        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] match_indeces)]
+        matched_indeces (keep-indexed #(when %2 %1) (map bib_check_head read_file))
+        res_object_list (reduce #(conj %1 (reduce parse_bib_object (ordered-map :source path :current_state 0 :current_line %2 :payload (ordered-map)) (drop %2 read_file))) [] matched_indeces)]
     res_object_list))
 
 (defn bib_file
