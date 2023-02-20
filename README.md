@@ -1,3 +1,5 @@
+Disclaimer: This tool is currently unmaintained.
+
 # BibCLI
 
 A simple tool to manage your bibliography resources locally.
